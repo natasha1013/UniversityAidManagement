@@ -17,3 +17,10 @@ HOW TO DOWNLOAD AND RUN THE FILE:
 
 4. Start server
    Command: python manage.py runserver
+
+=== HOW TO UPLOAD A NEWER VERSION ===
+1. Navigate to code
+2. Click 'branch' beside the 'main'
+3. New branch, name the branch with format (DDMMYYY_UPDATE_UPLOADER'S NAME)
+4. In your command prompt, type pip freeze > requirements.txt
+5. Upload all the files (can exclude pycache and .env file) inside the branch
