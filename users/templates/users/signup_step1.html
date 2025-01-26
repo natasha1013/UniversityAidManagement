@@ -1,0 +1,18 @@
+<!-- signup_step1.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup - Step 1</title>
+</head>
+<body>
+    <h1>Signup - Step 1</h1>
+
+    <form method="POST" action="{% url 'signup_step1' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Continue</button>
+    </form>
+</body>
+</html>
