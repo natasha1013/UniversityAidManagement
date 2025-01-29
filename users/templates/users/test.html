@@ -6,10 +6,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Lilac Grove University</title>
-  <link rel="stylesheet" href="{%static 'css/Login.css'%}">
-  <link rel="stylesheet" href="{%static 'css/main.css'%}">
-  
+  <link rel="stylesheet" href="{%static "css/Login.css" %}">
+  <!--<link rel="stylesheet" href="{%static "css/main.css" %}">-->
 </head>
+
 <body>
   <div class="container">
     <div class="image-section">
@@ -23,21 +23,18 @@
       </div>
 
       <form class="login-form" method="POST">
-        {% csrf_token %}
-
         <h2>Login</h2>
-        <p>Don't have an account? <a href="{% url "signup" %}">Register here</a></p>
+        <p>Don't have an account? <a href="#">Register here</a></p>
         <input type="text" name="username" placeholder="Username" required>
         <input type="password" name="password" placeholder="Your password" required>
-
-        <button type="submit">Log in</button> 
+        <select>
+          <option value="student">Student</option>
+          <option value="admin">Admin</option>
+          <option value="aidofficer">Aid Officer</option>
+          <option value="funders">Funders</option>
+        </select>
+        <button type="submit">Log in</button>
       </form>
-
-      {% if error_message %}
-        <div class="alert">
-          <p>{{ error_message }}</p>
-        </div>
-      {% endif %}
 
     </div>
   </div>

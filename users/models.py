@@ -15,6 +15,7 @@ class Account(AbstractUser):
         ('administrator', 'Administrator'),
     ]
 
+    # username            = models.CharField(max_length=150, unique=True)
     role                = models.CharField(max_length=13, choices=ROLE_LIST)
     study_program       = models.CharField(max_length=100, blank=True, null=True) # only for Students
     years_of_study      = models.IntegerField(blank=True, null=True)
@@ -27,3 +28,6 @@ class Account(AbstractUser):
 
     class Meta:
         db_table = 'users_masterlist'
+
+    def __str__(self):
+        return self.username
