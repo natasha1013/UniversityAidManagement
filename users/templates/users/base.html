@@ -5,7 +5,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Lilac Grove University</title>
+  <title>{% block title %}University Aid Management{% endblock %}</title>
   <link rel="stylesheet" href="{%static "css/main.css" %}">
+
+  {% block statics %}{% endblock statics %}
+  
 </head>
 
+<body>
+  {% block content %}
+
+  {% endblock content %}
+</body>
+
+</html>

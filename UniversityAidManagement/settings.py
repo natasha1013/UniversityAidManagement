@@ -127,7 +127,7 @@ STATICFILES_DIRS = [
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
-LOGIN_URL = '/users/login/'  # This is the path to your login page
+LOGIN_URL = 'login'  # This is the path to your login page
 
 AUTH_USER_MODEL = 'users.Account'
 

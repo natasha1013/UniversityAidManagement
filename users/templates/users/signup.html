@@ -1,61 +1,66 @@
+{% extends "users/base.html" %}
+
 {% load static %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - Lilac Grove University</title>
+
+{% block title %}
+    Sign Up - Lilac Grove University
+{% endblock title %}
+
+{% block statics %}
     <script src="{% static 'js/signup.js' %}"></script>
-    <link rel="stylesheet" href="{%static 'css/main.css'%}">
+{% endblock statics %}
 
-</head>
+{% block content %}
+    <form id="signup-form" method="POST" novalidate>
+        {% csrf_token %}
 
-<form id="signup-form" method="POST" novalidate>
-    {% csrf_token %}
+        {% if error_message %}
+            <p class="error-text">{{ error_message }}</p>
+        {% endif %}
 
-    {% if error_message %}
-        <p class="error-text">{{ error_message }}</p>
-    {% endif %}
+        <!-- Step 1: Basic Information -->
+        <div id="step-1">
+            <label for="email">Email:</label>
+            {{ form.email }}
 
-    <!-- Step 1: Basic Information -->
-    <div id="step-1">
-        <label for="email">Email:</label>
-        {{ form.email }}
+            <label for="password">Password:</label>
+            {{ form.password }}
 
-        <label for="password">Password:</label>
-        {{ form.password }}
+            <label for="password_confirmation">Confirm Password:</label>
+            {{ form.password_confirmation }}
 
-        <label for="password_confirmation">Confirm Password:</label>
-        {{ form.password_confirmation }}
+            <label for="role">Role:</label>
+            {{ form.role }}
 
-        <label for="role">Role:</label>
-        {{ form.role }}
-
-        <button id="continue-btn">Continue</button>
-    </div>
-
-    <!-- Step 2: Role-Specific Fields -->
-    <div id="step-2" style="display: none;">
-        <!-- Student Fields -->
-        <div id="student-fields" class="role-fields" style="display: none;">
-            <label>Username:</label> <input type="text" name="username" class="role-username">
-            <label>Phone Number:</label> <input type="text" name="phone_number" class="role-phone">
-            <label>Study Program:</label> <input type="text" name="study_program">
-            <label>Years of Study:</label> <input type="number" name="years_of_study">
-            <label>GPA:</label> <input type="text" name="gpa">
+            <button id="continue-btn">Continue</button>
         </div>
 
-        <div id="funder-fields" class="role-fields" style="display: none;">
-            <label>Username:</label> <input type="text" name="username" class="role-username">
-            <label>Phone Number:</label> <input type="text" name="phone_number" class="role-phone">
-            <label>Organization Name:</label> <input type="text" name="organization_name">
+        <!-- Step 2: Role-Specific Fields -->
+        <div id="step-2" style="display: none;">
+            <!-- Student Fields -->
+            <div id="student-fields" class="role-fields" style="display: none;">
+                <label>Username:</label> <input type="text" name="username" class="role-username">
+                <label>Phone Number:</label> <input type="text" name="phone_number" class="role-phone">
+                <label>Study Program:</label> <input type="text" name="study_program">
+                <label>Years of Study:</label> <input type="number" name="years_of_study">
+                <label>GPA:</label> <input type="text" name="gpa">
+            </div>
+
+            <div id="funder-fields" class="role-fields" style="display: none;">
+                <label>Username:</label> <input type="text" name="username" class="role-username">
+                <label>Phone Number:</label> <input type="text" name="phone_number" class="role-phone">
+                <label>Organization Name:</label> <input type="text" name="organization_name">
+            </div>
+
+            <div id="officer-fields" class="role-fields" style="display: none;">
+                <label>Username:</label> <input type="text" name="username" class="role-username">
+                <label>Phone Number:</label> <input type="text" name="phone_number" class="role-phone">
+            </div>
+
+            <button id="previous-btn">Previous</button>
+            <button type="submit" id="submit-btn">Sign Up</button>
+
         </div>
+    </form>
+{% endblock content %}
 
-        <div id="officer-fields" class="role-fields" style="display: none;">
-            <label>Username:</label> <input type="text" name="username" class="role-username">
-            <label>Phone Number:</label> <input type="text" name="phone_number" class="role-phone">
-        </div>
-
-        <button id="previous-btn">Previous</button>
-        <button type="submit" id="submit-btn">Sign Up</button>
-
-    </div>
-</form>

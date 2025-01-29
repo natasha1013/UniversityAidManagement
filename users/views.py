@@ -76,6 +76,9 @@ def login(request):
 
     return render(request, 'users/login.html', {'form': form, 'error_message': error_message})
 
+def home(request):
+    return redirect('login')
+
 def test(request):
     return render(request, 'users/test.html')
 
