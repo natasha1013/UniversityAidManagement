@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -128,11 +128,64 @@ def dashboard(request):
 def funder_dashboard(request):
     return render(request, 'dashboards/funder_dashboard.html')
 
+# admin-only views
 @role_required('administrator')
 @login_required
 def admin_dashboard(request):
     return render(request, 'dashboards/admin_dashboard.html')
 
+@login_required
+def pending_users(request):
+    if request.user.role != 'administrator':
+        raise PermissionDenied("You do not have permission to access this page.")
+    pending_users = Account.objects.filter(is_approved=False)
+    print(pending_users)  # Debug: Print the queryset
+    return render(request, 'dashboards/admin_dashboard.html', {
+        'section': 'pending_users',
+        'pending_users': pending_users
+    })
+
+@login_required
+def approve_user(request, user_id):
+    if request.user.role != 'administrator':
+        raise PermissionDenied("You do not have permission to access this page.")
+    user = get_object_or_404(Account, id=user_id)
+    user.is_approved = True
+    user.save()
+    return redirect('pending_users')
+
+@login_required
+def update_user(request):
+    # Example: Fetch all users for updating
+    users = Account.objects.all()
+    return render(request, 'dashboards/admin_dashboard.html', {'users': users, 'section': 'update_user'})
+
+@login_required
+def config_parameters(request):
+    # Example: Fetch configuration parameters
+    return render(request, 'dashboards/admin_dashboard.html', {'section': 'config_parameters'})
+
+@login_required
+def add_parameters(request):
+    # Example: Add new parameters
+    return render(request, 'dashboards/admin_dashboard.html', {'section': 'add_parameters'})
+
+@login_required
+def feedback_management(request):
+    # Example: Manage feedback
+    return render(request, 'dashboards/admin_dashboard.html', {'section': 'feedback_management'})
+
+@login_required
+def approve_requests(request):
+    # Example: Approve fund requests
+    return render(request, 'dashboards/admin_dashboard.html', {'section': 'approve_requests'})
+
+@login_required
+def edit_program(request):
+    # Example: Edit program details
+    return render(request, 'dashboards/admin_dashboard.html', {'section': 'edit_program'})
+
+# officer-only views
 @role_required('officer')
 @login_required
 def officer_dashboard(request):

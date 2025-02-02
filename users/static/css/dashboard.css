@@ -1,0 +1,19 @@
+/* Hide submenu by default */
+.submenu {
+    display: none;
+}
+
+/* Style for active section */
+.menu-section.active .submenu {
+    display: block;
+}
+
+/* Optional: Add some styling for better UX */
+h1 {
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+}
+h2 {
+    margin-left: 20px;
+}

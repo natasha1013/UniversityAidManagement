@@ -5,9 +5,84 @@
     Admin Dashboard
 {% endblock dashboard_title %}
 
-{% block dashboard %}
-    <h1>Manage Profile</h1>
-    <h2>Approve User</h2>
-    <h2>Update User</h2>
+{% block menu %}
+    <div class="menu-section">
+        <h1 id="manage-profile">Manage Profile</h1>
+        <div class="submenu">
+            <h2><a href="{% url 'pending_users' %}">Approve User</a></h2>
+            <h2><a href="{% url 'update_user' %}">Update User</a></h2>
+        </div>
+    </div>
 
-{% endblock dashboard %}
+    <div class="menu-section">
+        <h1 id="system-settings">System Settings</h1>
+        <div class="submenu">
+            <h2><a href="{% url 'config_parameters' %}">Configuration Parameters</a></h2>
+            <h2><a href="{% url 'add_parameters' %}">Add Parameters</a></h2>
+        </div>
+    </div>
+
+    <div class="menu-section">
+        <h1 id="feedback">Feedback</h1>
+        <div class="submenu">
+            <h2><a href="{% url 'feedback_management' %}">Feedback Management</a></h2>
+        </div>
+    </div>
+
+    <div class="menu-section">
+        <h1 id="fund-proposal">Fund Proposal</h1>
+        <div class="submenu">
+            <h2><a href="{% url 'approve_requests' %}">Approve Requests</a></h2>
+            <h2><a href="{% url 'edit_program' %}">Edit Program</a></h2>
+        </div>
+    </div>
+{% endblock menu %}
+
+{% block main_content %}
+    {% if section == 'pending_users' %}
+        <h2>Pending Users</h2>
+        <ul class="pending-users-list">
+            {% if pending_users %}
+                {% for user in pending_users %}
+                    <li>
+                        {{ user.username }} ({{ user.get_role_display }})
+                        <a href="{% url 'approve_user' user.id %}" class="btn btn-success">Approve</a>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li>No pending users to approve.</li>
+            {% endif %}
+        </ul>
+    {% elif section == 'update_user' %}
+        <h2>Update User</h2>
+        <ul>
+            {% for user in users %}
+                <li>{{ user.username }} - <a href="#">Edit</a></li>
+            {% endfor %}
+        </ul>
+
+    {% elif section == 'config_parameters' %}
+        <h2>Configuration Parameters</h2>
+        <p>Display configuration parameters here.</p>
+
+    {% elif section == 'add_parameters' %}
+        <h2>Add Parameters</h2>
+        <p>Add new parameters here.</p>
+
+    {% elif section == 'feedback_management' %}
+        <h2>Feedback Management</h2>
+        <p>Manage feedback here.</p>
+
+    {% elif section == 'approve_requests' %}
+        <h2>Approve Requests</h2>
+        <p>Approve fund requests here.</p>
+
+    {% elif section == 'edit_program' %}
+        <h2>Edit Program</h2>
+        <p>Edit program details here.</p>
+
+    {% else %}
+        <p>Select an option from the menu to view its content.</p>
+    {% endif %}
+    
+{% endblock main_content %}
