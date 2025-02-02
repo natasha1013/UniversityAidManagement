@@ -8,59 +8,81 @@
 
 {% block statics %}
     <script src="{% static 'js/signup.js' %}"></script>
+    <link rel="stylesheet" href="{%static 'css/Signup.css'%}">
 {% endblock statics %}
 
 {% block content %}
-    <form id="signup-form" method="POST" novalidate>
-        {% csrf_token %}
+    <div class="container">
 
-        {% if error_message %}
-            <p class="error-text">{{ error_message }}</p>
-        {% endif %}
+        <div class="form-section" >
+            <div class="logo">
+                <img src="{% static 'img/logo.png' %}" alt="Lilac Grove University Logo">
+                <h1>LILAC GROVE UNIVERSITY</h1>
+                <p>AID MANAGEMENT</p>
+            </div>
+            <h2>Create Account</h2>
+    
+            <form id="signup-form" method="POST" novalidate>
+                {% csrf_token %}
+        
+                {% if error_message %}
+                    <p class="error-text">{{ error_message }}</p>
+                {% endif %}
+        
+                <!-- Step 1: Basic Information -->
+                <div id="step-1">
+                    <label for="email">Email:</label>
+                    {{ form.email }}
+        
+                    <label for="password">Password:</label>
+                    {{ form.password }}
+        
+                    <label for="password_confirmation">Confirm Password:</label>
+                    {{ form.password_confirmation }}
+        
+                    <label for="role">Role:</label>
+                    {{ form.role }}
+        
+                    <button id="continue-btn">Continue</button>
+                </div>
+        
+                <!-- Step 2: Role-Specific Fields -->
+                <div id="step-2" style="display: none;">
+                    <!-- Student Fields -->
+                    <div id="student-fields" class="role-fields" style="display: none;">
+                        <label>Username:</label> <input type="text" name="username" class="role-username">
+                        <label>Phone Number:</label> <input type="text" name="phone_number" class="role-phone">
+                        <label>Study Program:</label> <input type="text" name="study_program">
+                        <label>Years of Study:</label> <input type="number" name="years_of_study">
+                        <label>GPA:</label> <input type="text" name="gpa">
+                    </div>
+        
+                    <div id="funder-fields" class="role-fields" style="display: none;">
+                        <label>Username:</label> <input type="text" name="username" class="role-username">
+                        <label>Phone Number:</label> <input type="text" name="phone_number" class="role-phone">
+                        <label>Organization Name:</label> <input type="text" name="organization_name">
+                    </div>
+        
+                    <div id="officer-fields" class="role-fields" style="display: none;">
+                        <label>Username:</label> <input type="text" name="username" class="role-username">
+                        <label>Phone Number:</label> <input type="text" name="phone_number" class="role-phone">
+                    </div>
+        
+                    <button id="previous-btn">Previous</button>
+                    <button type="submit" id="submit-btn">Sign Up</button>
+        
+                </div>
+            </form>
+            <p>Have an account? <a href="{% url "login" %}">Login</a></p>
+        </div>
+        
 
-        <!-- Step 1: Basic Information -->
-        <div id="step-1">
-            <label for="email">Email:</label>
-            {{ form.email }}
-
-            <label for="password">Password:</label>
-            {{ form.password }}
-
-            <label for="password_confirmation">Confirm Password:</label>
-            {{ form.password_confirmation }}
-
-            <label for="role">Role:</label>
-            {{ form.role }}
-
-            <button id="continue-btn">Continue</button>
+        <!-- Right Section: Image -->
+        <div class="image-section">
+            <img src="{% static 'img/Signup.png' %}" alt="Sign In Illustration" class="signin-image">
         </div>
 
-        <!-- Step 2: Role-Specific Fields -->
-        <div id="step-2" style="display: none;">
-            <!-- Student Fields -->
-            <div id="student-fields" class="role-fields" style="display: none;">
-                <label>Username:</label> <input type="text" name="username" class="role-username">
-                <label>Phone Number:</label> <input type="text" name="phone_number" class="role-phone">
-                <label>Study Program:</label> <input type="text" name="study_program">
-                <label>Years of Study:</label> <input type="number" name="years_of_study">
-                <label>GPA:</label> <input type="text" name="gpa">
-            </div>
-
-            <div id="funder-fields" class="role-fields" style="display: none;">
-                <label>Username:</label> <input type="text" name="username" class="role-username">
-                <label>Phone Number:</label> <input type="text" name="phone_number" class="role-phone">
-                <label>Organization Name:</label> <input type="text" name="organization_name">
-            </div>
-
-            <div id="officer-fields" class="role-fields" style="display: none;">
-                <label>Username:</label> <input type="text" name="username" class="role-username">
-                <label>Phone Number:</label> <input type="text" name="phone_number" class="role-phone">
-            </div>
-
-            <button id="previous-btn">Previous</button>
-            <button type="submit" id="submit-btn">Sign Up</button>
-
-        </div>
-    </form>
+    </div>
+    
 {% endblock content %}
 

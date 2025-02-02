@@ -64,8 +64,14 @@ def login(request):
             user = authenticate(request, username=username, password=password)
             
             if user is not None:
-                auth_login(request, user)
-                return redirect('dashboard')
+
+                # Check if the user's account is approved
+                if user.is_approved:  # Assuming `is_approved` is a boolean field in your User model
+                    auth_login(request, user)
+                    return redirect('dashboard')
+                else:
+                    # Redirect to pending approval page if account is not approved
+                    return redirect('approval_pending')
             else:
                 error_message = "Invalid username or password"
         else:

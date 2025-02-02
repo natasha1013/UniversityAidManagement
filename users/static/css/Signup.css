@@ -1,0 +1,124 @@
+/* Container styling */
+.container {
+    display: flex;
+    width: 90%;
+    max-width: 1200px;
+    background: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Left form section */
+.form-section {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #ffffff;
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    width: 100%;
+}
+
+/*logo*/
+.logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo img {
+    height: 60px;
+    margin-bottom: 10px;
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    color: #785B9C;
+    margin: 0;
+}
+
+.logo p {
+    font-size: 1rem;
+    color: #785B9C;
+    margin: 5px 0 0;
+}
+
+/* Form Title*/
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #333;
+    align-items: flex-start; /* Align items to the start (left) */
+}
+
+p {
+    margin: 10px 0 20px;
+    color: #666;
+    text-align: center;
+}
+
+/* Form styling */
+form {
+    width: 100%;
+    max-width: 400px; /* Limit form width for better readability */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Input fields */
+form input,
+form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    outline: none;
+    box-sizing: border-box; /* Include padding and border in the element's total width */
+}
+
+form input:focus,
+form select:focus {
+    border-color: #785B9C; /* Add focus state for better UX */
+    box-shadow: 0 0 5px rgba(120, 91, 156, 0.5);
+}
+
+/* Submit button */
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #34A77F;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 10px; /* Add margin for spacing */
+}
+
+button:hover {
+    background-color: #624286;
+}
+
+/* Right image section */
+.image-section {
+    flex: 1;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Image */
+.signin-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+a{
+    color: #785B9C;
+}
