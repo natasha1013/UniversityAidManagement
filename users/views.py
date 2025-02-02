@@ -1,10 +1,20 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from .forms import *
 from .models import Account
+
+def role_required(role_name):
+    def decorator(view_func):
+        def wrapper(request, *args, **kwargs):
+            if request.user.role != role_name:
+                raise PermissionDenied("You do not have permission to access this page.")
+            return view_func(request, *args, **kwargs)
+        return wrapper
+    return decorator
 
 @never_cache
 def signup(request):
@@ -56,9 +66,6 @@ def signup(request):
 
     return render(request, "users/signup.html", {"form": form, "error_message": error_message})
 
-def approval_pending(request):
-    return render(request, 'users/approval_pending.html')
-
 @never_cache
 def login(request):
     # Redirect to dashboard if the user is already logged in
@@ -94,17 +101,59 @@ def login(request):
 
     return render(request, 'users/login.html', {'form': form, 'error_message': error_message})
 
+@login_required
+def dashboard(request):
+        # Map roles to their respective dashboard functions
+    role_dashboard_map = {
+        'administrator': admin_dashboard,
+        'student': student_dashboard,
+        'officer': officer_dashboard,
+        'funder': funder_dashboard,
+    }
+
+    # Get the user's role
+    user_role = request.user.role
+
+    # Check if the role exists in the map
+    if user_role in role_dashboard_map:
+        # Call the appropriate dashboard function
+        return role_dashboard_map[user_role](request)
+    else:
+        # Handle unknown roles (e.g., redirect to a default page)
+        messages.error(request, "Your role is not recognized. Please contact support.")
+        return redirect('home')  # Redirect to a safe fallback page
+
+@role_required('funder')
+@login_required
+def funder_dashboard(request):
+    return render(request, 'dashboards/funder_dashboard.html')
+
+@role_required('administrator')
+@login_required
+def admin_dashboard(request):
+    return render(request, 'dashboards/admin_dashboard.html')
+
+@role_required('officer')
+@login_required
+def officer_dashboard(request):
+    return render(request, 'dashboards/officer_dashboard.html')
+
+@role_required('student')
+@login_required
+def student_dashboard(request):
+    return render(request, 'dashboards/dashboard.html')
+
+# logout 
+@login_required
+def logout_view(request):
+    logout(request)  # This will log out the user
+    return redirect('login')  # Redirect to the login page
+
 def home(request):
     return redirect('login')
 
 def test(request):
     return render(request, 'users/test.html')
 
-@login_required
-def dashboard(request):
-    return render(request, 'users/dashboard.html')
-
-@login_required
-def logout_view(request):
-    logout(request)  # This will log out the user
-    return redirect('login')  # Redirect to the login page
+def approval_pending(request):
+    return render(request, 'users/approval_pending.html')
