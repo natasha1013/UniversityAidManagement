@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from .forms import *
 from .models import Account
 
+@never_cache
 def signup(request):
 
     # Redirect to dashboard if the user is already logged in
@@ -57,6 +59,7 @@ def signup(request):
 def approval_pending(request):
     return render(request, 'users/approval_pending.html')
 
+@never_cache
 def login(request):
     # Redirect to dashboard if the user is already logged in
     if request.user.is_authenticated:
