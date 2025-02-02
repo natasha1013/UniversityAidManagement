@@ -7,10 +7,11 @@
 
 {% block menu %}
     <div class="menu-section">
-        <h1 id="manage-profile">Manage Profile</h1>
+        <h1 id="manage-profile">User Management</h1>
         <div class="submenu">
             <h2><a href="{% url 'pending_users' %}">Approve User</a></h2>
             <h2><a href="{% url 'update_user' %}">Update User</a></h2>
+            <h2><a href="{% url 'dashboard' %}">Manage Profile</a></h2>
         </div>
     </div>
 
@@ -45,8 +46,9 @@
             {% if pending_users %}
                 {% for user in pending_users %}
                     <li>
-                        {{ user.username }} ({{ user.get_role_display }})
+                        ID: {{ user.id }} | Username: {{ user.username }} | Email: {{ user.email }}
                         <a href="{% url 'approve_user' user.id %}" class="btn btn-success">Approve</a>
+                        <a href="{% url 'reject_user' user.id %}" class="btn btn-danger">Reject</a>
                     </li>
                 {% endfor %}
             {% else %}
@@ -82,7 +84,7 @@
         <p>Edit program details here.</p>
 
     {% else %}
-        <p>Select an option from the menu to view its content.</p>
+        <p>Update Profile.</p>
     {% endif %}
     
 {% endblock main_content %}

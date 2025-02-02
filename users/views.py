@@ -155,6 +155,24 @@ def approve_user(request, user_id):
     return redirect('pending_users')
 
 @login_required
+def reject_user(request, user_id):
+    if request.user.role != 'administrator':
+        raise PermissionDenied("You do not have permission to access this page.")
+    
+    # Get the user to reject
+    user = get_object_or_404(Account, id=user_id)
+    
+    # Delete the user account
+    username = user.username  # Store the username for feedback
+    user.delete()
+    
+    # Provide feedback to the administrator
+    messages.success(request, f'User "{username}" has been rejected and removed from the system.')
+    
+    # Redirect back to the pending users page
+    return redirect('pending_users')
+
+@login_required
 def update_user(request):
     # Example: Fetch all users for updating
     users = Account.objects.all()
