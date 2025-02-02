@@ -6,6 +6,11 @@ from .forms import *
 from .models import Account
 
 def signup(request):
+
+    # Redirect to dashboard if the user is already logged in
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
     error_message = None
     if request.method == "POST":
         form = SignUpForm(request.POST)
@@ -53,6 +58,10 @@ def approval_pending(request):
     return render(request, 'users/approval_pending.html')
 
 def login(request):
+    # Redirect to dashboard if the user is already logged in
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
     error_message = None  # Default no error
     if request.method == 'POST':
         form = LoginForm(request.POST)
