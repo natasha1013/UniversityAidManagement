@@ -1,4 +1,12 @@
 /* Container styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    min-height: 100vh; /* Use min-height to ensure full viewport coverage */
+}
+
 .container {
     display: flex;
     width: 90%;

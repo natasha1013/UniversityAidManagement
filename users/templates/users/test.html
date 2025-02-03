@@ -3,40 +3,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Lilac Grove University</title>
-  <link rel="stylesheet" href="{%static "css/Login.css" %}">
-  <!--<link rel="stylesheet" href="{%static "css/main.css" %}">-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="{%static "css/manageprofile.css" %}">
 </head>
-
 <body>
-  <div class="container">
-    <div class="image-section">
-      <img src="{% static "img/login.png" %}" alt="Graduation" class="login-image">
-    </div>
-    <div class="login-section">
-      <div class="logo">
-        <img src="{% static "img/logo.png" %}" alt="Lilac Grove University Logo">
-        <h1>LILAC GROVE UNIVERSITY</h1>
-        <p>AID MANAGEMENT</p>
-      </div>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="{% static "img/logo.png" %}" alt="Lilac Grove Logo">
+                <h1>LILAC GROVE UNIVERSITY AID MANAGEMENT</h1>
+            </div>
+            <nav class="menu">
+                <a href="#" class="menu-item active">Homepage</a>
+                <a href="#" class="menu-item">Profile</a>
+            </nav>
+        </aside>
 
-      <form class="login-form" method="POST">
-        <h2>Login</h2>
-        <p>Don't have an account? <a href="#">Register here</a></p>
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Your password" required>
-        <select>
-          <option value="student">Student</option>
-          <option value="admin">Admin</option>
-          <option value="aidofficer">Aid Officer</option>
-          <option value="funders">Funders</option>
-        </select>
-        <button type="submit">Log in</button>
-      </form>
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Navbar -->
+            <div class="navbar">
+                <div class="tabs">
+                    <a href="#" class="tab active">User Profile</a>
+                    <a href="#" class="tab">Application Status</a>
+                    <a href="#" class="tab">Fund Utilization</a>
+                    <a href="#" class="tab">Feedback</a>
+                </div>
+                <div class="logout">
+                    <a href="#">Logout</a>
+                </div>
+            </div>
 
+            <!-- Profile Details -->
+            <section class="profile-details">
+                <div class="profile-header">
+                    <h2>Profile Details</h2>
+                    <button class="action-button">Edit</button>
+                </div>
+                
+                <div class="details">
+                    <form>
+                        <div class="form-group">
+                            <label for="fullname">Full Name</label>
+                            <input type="text" id="fullname" placeholder="Full Name" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentid">Student ID</label>
+                            <input type="text" id="studentid" placeholder="12223445" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" placeholder="email@mail.com" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone_number">Contact Number</label>
+                            <input type="tel" name="phone_number" placeholder="+60" readonly>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="years_of_study">Years of Study</label>
+                            <input type="text" id="years_of_study" placeholder="3 years" readonly>
+                        </div>
+                    </form>
+                </div>
+            </section>            
+
+            <!-- Impact Report Section -->
+            <section class="impact-report">
+                <div class="report-header">
+                    <h2>Impact Report</h2>
+                    <button class="upload-button">Upload</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Document</th>
+                            <th>Status</th>
+                            <th>Last Update</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                        <tr>
+                            <td>{{ report.document_name }}</td>
+                            <td>{{ report.status }}</td>
+                            <td>{{ report.last_update }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3">No reports available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>            
+
+            <!-- Delete Account Section -->
+            <div class="delete-account-section">
+                <h3>Delete Account</h3>
+                <p>To confirm your identity, please verify your password:</p>
+                <form method="POST" action="/delete-account/">
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Password"
+                        required
+                        class="delete-account-input"
+                    />
+                    <button type="submit" class="delete-button">Continue</button>
+                </form>
+            </div>
+        </main>
     </div>
-  </div>
 </body>
 </html>

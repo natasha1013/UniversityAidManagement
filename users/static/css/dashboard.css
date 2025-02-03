@@ -1,27 +1,298 @@
-/* Hide submenu by default */
-.submenu {
-    display: none;
+/* Layout */
+.container {
+    display: flex;
+    min-height: 100vh; /* Ensure at least full viewport height */
+    width: 100%; /* Full width */
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent overflow issues */
 }
 
-/* Style for active section */
-.menu-section.active .submenu {
+.sidebar {
+    width: 240px;
+    background-color: #eae8f2;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.logo img {
+    max-width: 120px;
+    margin: 0 auto 20px;
     display: block;
 }
 
-.menu-section .submenu {
-    display: none; /* Hide submenus by default */
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.menu-section h1 {
-    cursor: pointer; /* Make headings clickable */
+.menu-item {
+    text-decoration: none;
+    color: #4a4a4a;
+    font-size: 16px;
+    padding: 10px;
+    text-align: center;
+    border-radius: 8px;
+    transition: background-color 0.3s;
 }
 
-/* Optional: Add some styling for better UX */
-h1 {
-    cursor: pointer;
+.menu-item:hover, .menu-item.active {
+    background-color: #d1cde5;
+    color: #4a4a4a;
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+    width: calc(100% - 240px); /* Subtract sidebar width */
+    overflow-y: auto; /* Enable scrolling within the content area */
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.tabs {
+    display: flex;
+    gap: 20px;
+}
+
+.tab {
+    text-decoration: none;
     font-weight: bold;
-    margin-top: 10px;
+    color: #4a4a4a;
+    padding: 5px 10px;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.3s;
 }
-h2 {
-    margin-left: 20px;
+
+.tab.active {
+    border-color: #6b6bdf;
+}
+
+.logout a {
+    text-decoration: none;
+    color: #4a4a4a;
+    font-weight: bold;
+}
+
+/* Profile Details Section */
+.profile-details {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.details form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns */
+    gap: 20px; /* Spacing between items */
+    margin-top: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: span 2; /* Spans the entire row for full-width fields */
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+}
+
+.userprofilepicture img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+
+.info {
+    flex: 1;
+}
+
+.edit-btn {
+    background-color: #6b6bdf;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.edit-btn:hover {
+    background-color: #5757c2;
+}
+
+.action-button {
+    background-color: #007bff; /* Blue background */
+    color: white;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    position: absolute; /* Allow positioning */
+    top: 0; /* Align button to the top */
+    right: 0; /* Align button to the right */
+}
+
+.action-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between; /* Space between title and button */
+    align-items: center;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+
+/* Impact Report Section */
+.impact-report {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.impact-report table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.impact-report th, .impact-report td {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.impact-report th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.impact-report tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.report-header {
+    display: flex;
+    justify-content: space-between; /* Space between title and button */
+    align-items: center;
+    margin-bottom: 1rem;
+    position: relative; /* Required for absolute positioning */
+}
+
+.upload-button {
+    background-color: #007bff !important; /* Blue background */
+    color: white !important;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    position: absolute;
+    top: 0; /* Align button to the top */
+    right: 0; /* Align button to the right */
+}
+
+.upload-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Delete Account Section */
+/* Google Font Example */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+
+.delete-account-section {
+  background-color: #ffffff ; /* White background */
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  max-width: 600px; /* Centered container size */
+  margin: 2rem auto; /* Center align the section */
+}
+
+.delete-account-section h3 {
+  font-size: 1.5rem;
+  color: #000; /* Black text */
+  font-family: 'Roboto', sans-serif;
+  margin-bottom: 1rem;
+  font-weight: 500; /* Slightly bold */
+}
+
+.delete-account-section p {
+  font-size: 1rem;
+  color: #555;
+  font-family: 'Roboto', sans-serif;
+  margin-bottom: 1rem;
+}
+
+.delete-account-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  background-color: #f9f9f9;
+  margin-bottom: 1rem;
+  outline: none;
+}
+
+.delete-account-input:focus {
+  border-color: #007bff; /* Blue border when focused */
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.delete-button {
+  width: 100%; /* Full-width button */
+  background-color: #007bff !important; /* Blue background */
+  color: #fff !important;
+  font-size: 1rem;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.delete-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  box-shadow: 0 4px 6px rgba(0, 91, 187, 0.2); /* Slight shadow */
+}
+
+.delete-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 91, 187, 0.25);
 }
