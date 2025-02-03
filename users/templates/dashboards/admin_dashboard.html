@@ -13,49 +13,58 @@
 {% endblock menu %}
 
 {% block navbar %}
-    <a href="#" class="tab active">Approve User</a>
-    <a href="#" class="tab">Update User</a>
-    <a href="#" class="tab">Manage Profile</a>
+    <a href="{% url 'dashboard' %}?tab=pending_users" class="tab {% if active_tab == 'pending_users' %}active{% endif %}">Approve User</a>
+    <a href="{% url 'dashboard' %}?tab=update_user" class="tab {% if active_tab == 'update_user' %}active{% endif %}">Update User</a>
+    <a href="{% url 'dashboard' %}?tab=manage_profile" class="tab {% if active_tab == 'manage_profile' %}active{% endif %}">Manage Profile</a>
 {% endblock navbar %}
 
 {% block dashboard %}
-<h2>Pending Users</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th colspan='2'>Action</th>
-            </tr>
-        </thead>
+    {% if active_tab == 'pending_users' %}
+        <h2>Pending Users</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th colspan='2'>Action</th>
+                </tr>
+            </thead>
 
-        <tbody>
-            {% for user in pending_users %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.email }}</td>
-                <td>
-                    <form action="{% url 'approve_user' user.id %}" method="post" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-success">Approve</button>
-                    </form>
-                </td>
+            <tbody>
+                {% for user in pending_users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <form action="{% url 'approve_user' user.id %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Approve</button>
+                        </form>
+                    </td>
 
-                <td>
-                    <form action="{% url 'reject_user' user.id %}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to reject this user?');">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Reject</button>
-                    </form>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5">No pending users to approve.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+                    <td>
+                        <form action="{% url 'reject_user' user.id %}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to reject this user?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No pending users to approve.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
 
-    </table>
+        </table>
+    {% elif active_tab == 'update_user' %}
+        <h2>Update User</h2>
+
+    {% elif active_tab == 'manage_profile' %}
+        <h2>Manage Profile</h2>
+    
+    {% endif %}
+
 {% endblock dashboard %}

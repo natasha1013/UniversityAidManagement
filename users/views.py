@@ -132,7 +132,26 @@ def funder_dashboard(request):
 @role_required('administrator')
 @login_required
 def admin_dashboard(request):
-    return redirect('pending_users')
+    # Get the 'tab' query parameter (default to 'pending_users')
+    active_tab = request.GET.get('tab', 'pending_users')
+
+    # Ensure the user has administrator privileges
+    if request.user.role != 'administrator':
+        raise PermissionDenied("You do not have permission to access this page.")
+
+    # Fetch data based on the active tab
+    context = {'active_tab': active_tab}
+    if active_tab == 'pending_users':
+        pending_users = Account.objects.filter(is_approved=False)
+        context['pending_users'] = pending_users
+    elif active_tab == 'update_user':
+        users = Account.objects.all()
+        context['users'] = users
+    elif active_tab == 'manage_profile':
+        # Add logic for managing profiles if needed
+        pass
+
+    return render(request, 'dashboards/admin_dashboard.html', context)
 
 @login_required
 def pending_users(request):
