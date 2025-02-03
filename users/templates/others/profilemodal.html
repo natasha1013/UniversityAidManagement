@@ -1,0 +1,71 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/modals.css' %}">
+<script src="{% static 'js/modal.js' %}"></script>
+
+<!-- Custom Modal -->
+<div id="editUserModal" class="custom-modal" style="display: none;">
+    <div class="custom-modal-content">
+        <div class="custom-modal-header">
+            <h5>Edit User</h5>
+            <button class="custom-close-btn" onclick="closeModal()">×</button>
+        </div>
+        <div class="custom-modal-body">
+            <form id="editUserForm" method="post" action="{% url 'update_user' 0 %}">
+                {% csrf_token %}
+                <input type="hidden" id="userId" name="user_id">
+
+                <!-- Common Fields -->
+                <div class="mb-3">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="first_name">First Name</label>
+                    <input type="text" id="first_name" name="first_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="phone_number">Phone Number</label>
+                    <input type="text" id="phone_number" name="phone_number" required>
+                </div>
+
+                <!-- Role-Specific Fields -->
+                <div id="studentFields" style="display: none;">
+                    <div class="mb-3">
+                        <label for="study_program">Study Program</label>
+                        <input type="text" id="study_program" name="study_program">
+                    </div>
+                    <div class="mb-3">
+                        <label for="years_of_study">Years of Study</label>
+                        <input type="number" id="years_of_study" name="years_of_study">
+                    </div>
+                    <div class="mb-3">
+                        <label for="gpa">GPA</label>
+                        <input type="number" step="0.01" id="gpa" name="gpa">
+                    </div>
+                </div>
+                <div id="funderFields" style="display: none;">
+                    <div class="mb-3">
+                        <label for="organization_name">Organization Name</label>
+                        <input type="text" id="organization_name" name="organization_name">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="custom-modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+            <button type="submit" form="editUserForm" class="btn-primary">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- Backdrop -->
+<div id="modalBackdrop" class="custom-modal-backdrop" style="display: none;"></div>

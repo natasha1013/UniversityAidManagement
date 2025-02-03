@@ -12,7 +12,9 @@ urlpatterns = [
     path('profile/approve-user/<int:user_id>/', views.approve_user, name = 'approve_user'),
     path('profile/reject-user/<int:user_id>/', views.reject_user, name='reject_user'),
     
-    path('profile/update-user/', views.update_user, name='update_user'),
+    path('profile/update-user/<int:user_id>/', views.update_user, name='update_user'),
+    path('api/users/<int:user_id>/', views.user_detail_api, name='user_detail_api'),
+
     path('profile/config-parameters/', views.config_parameters, name='config_parameters'),
     path('profile/add-parameters/', views.add_parameters, name='add_parameters'),
     path('profile/feedback-management/', views.feedback_management, name='feedback_management'),

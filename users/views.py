@@ -6,6 +6,8 @@ from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from .forms import *
 from .models import Account
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 def role_required(role_name):
     def decorator(view_func):
@@ -15,6 +17,33 @@ def role_required(role_name):
             return view_func(request, *args, **kwargs)
         return wrapper
     return decorator
+
+@csrf_exempt
+def user_detail_api(request, user_id):
+    try:
+        user = Account.objects.get(id=user_id)
+        data = {
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'phone_number': user.phone_number,
+            'role': user.role,
+        }
+        if user.role == 'student':
+            data.update({
+                'study_program': user.study_program,
+                'years_of_study': user.years_of_study,
+                'gpa': user.gpa,
+            })
+        elif user.role == 'funder':
+            data.update({
+                'organization_name': user.organization_name,
+            })
+        return JsonResponse(data)
+    except Account.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
 
 @never_cache
 def signup(request):
@@ -85,7 +114,7 @@ def login(request):
             if user is not None:
 
                 # Check if the user's account is approved
-                if user.is_approved:  # Assuming `is_approved` is a boolean field in your User model
+                if user.is_approved: 
                     auth_login(request, user)
                     return redirect('dashboard')
                 else:
@@ -148,7 +177,7 @@ def admin_dashboard(request):
         users = Account.objects.all()
         context['users'] = users
     elif active_tab == 'manage_profile':
-        # Add logic for managing profiles if needed
+        # not yet
         pass
 
     return render(request, 'dashboards/admin_dashboard.html', context)
@@ -191,10 +220,32 @@ def reject_user(request, user_id):
     return redirect('pending_users')
 
 @login_required
-def update_user(request):
-    # Example: Fetch all users for updating
-    users = Account.objects.all()
-    return render(request, 'dashboards/admin_dashboard.html', {'users': users, 'section': 'update_user'})
+def update_user(request, user_id):
+    if request.user.role != 'administrator':
+        raise PermissionDenied("You do not have permission to access this page.")
+
+    user = get_object_or_404(Account, id=user_id)
+
+    if request.method == 'POST':
+        # Common fields
+        user.username = request.POST.get('username')
+        user.first_name = request.POST.get('first_name')
+        user.last_name = request.POST.get('last_name')
+        user.email = request.POST.get('email')
+        user.phone_number = request.POST.get('phone_number')
+
+        # Role-specific fields
+        if user.role == 'student':
+            user.study_program = request.POST.get('study_program')
+            user.years_of_study = request.POST.get('years_of_study')
+            user.gpa = request.POST.get('gpa')
+        elif user.role == 'funder':
+            user.organization_name = request.POST.get('organization_name')
+
+        user.save()
+        messages.success(request, f'User "{user.username}" has been updated.')
+
+    return redirect('dashboard')
 
 @login_required
 def config_parameters(request):
