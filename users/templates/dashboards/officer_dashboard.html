@@ -2,10 +2,18 @@
 {% load static %}
 
 {% block dashboard_title %}
-    Officer Dashboard
+    Aid Officer Dashboard
 {% endblock dashboard_title %}
 
-{% block dashboard %}
-    <h2>Officer Dashboard</h2>
-    <p>The page is currently in progress</p>
-{% endblock dashboard %}
+{% block menu %}
+    <a href="#" class="menu-item active">Communication</a>
+    <a href="#" class="menu-item">Fund Utilization</a>
+    <a href="#" class="menu-item">Manage Fund Allocation</a>
+    <a href="#" class="menu-item">Impact Report</a>
+    <a href="#" class="menu-item">Overview of Aid Request</a>
+    <a href="#" class="menu-item">Feedback</a>
+{% endblock menu %}
+
+{% block navbar %}
+    <a href="#" class="tab active">Chat</a>
+{% endblock navbar %}
