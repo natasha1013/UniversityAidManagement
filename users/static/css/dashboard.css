@@ -8,6 +8,14 @@
     display: block;
 }
 
+.menu-section .submenu {
+    display: none; /* Hide submenus by default */
+}
+
+.menu-section h1 {
+    cursor: pointer; /* Make headings clickable */
+}
+
 /* Optional: Add some styling for better UX */
 h1 {
     cursor: pointer;

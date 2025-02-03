@@ -139,7 +139,6 @@ def pending_users(request):
     if request.user.role != 'administrator':
         raise PermissionDenied("You do not have permission to access this page.")
     pending_users = Account.objects.filter(is_approved=False)
-    print(pending_users)  # Debug: Print the queryset
     return render(request, 'dashboards/admin_dashboard.html', {
         'section': 'pending_users',
         'pending_users': pending_users
