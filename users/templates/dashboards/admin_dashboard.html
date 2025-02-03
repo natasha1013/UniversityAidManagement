@@ -6,87 +6,56 @@
 {% endblock dashboard_title %}
 
 {% block menu %}
-    <div class="menu-section">
-        <h1 id="manage-profile">User Management</h1>
-        <div class="submenu">
-            <h2><a href="{% url 'pending_users' %}">Approve User</a></h2>
-            <h2><a href="{% url 'update_user' %}">Update User</a></h2>
-            <h2><a href="{% url 'dashboard' %}">Manage Profile</a></h2>
-        </div>
-    </div>
-
-    <div class="menu-section">
-        <h1 id="system-settings">System Settings</h1>
-        <div class="submenu">
-            <h2><a href="{% url 'config_parameters' %}">Configuration Parameters</a></h2>
-            <h2><a href="{% url 'add_parameters' %}">Add Parameters</a></h2>
-        </div>
-    </div>
-
-    <div class="menu-section">
-        <h1 id="feedback">Feedback</h1>
-        <div class="submenu">
-            <h2><a href="{% url 'feedback_management' %}">Feedback Management</a></h2>
-        </div>
-    </div>
-
-    <div class="menu-section">
-        <h1 id="fund-proposal">Fund Proposal</h1>
-        <div class="submenu">
-            <h2><a href="{% url 'approve_requests' %}">Approve Requests</a></h2>
-            <h2><a href="{% url 'edit_program' %}">Edit Program</a></h2>
-        </div>
-    </div>
-
+    <a href="#" class="menu-item active">User Management</a>
+    <a href="#" class="menu-item active">System Settings</a>
+    <a href="#" class="menu-item active">Feedback</a>
+    <a href="#" class="menu-item active">Fund Proposal</a>
 {% endblock menu %}
 
-{% block main_content %}
-    {% if section == 'pending_users' %}
-        <h2>Pending Users</h2>
-        <ul class="pending-users-list">
-            {% if pending_users %}
-                {% for user in pending_users %}
-                    <li>
-                        ID: {{ user.id }} | Username: {{ user.username }} | Email: {{ user.email }}
-                        <a href="{% url 'approve_user' user.id %}" class="btn btn-success">Approve</a>
-                        <a href="{% url 'reject_user' user.id %}" class="btn btn-danger">Reject</a>
-                    </li>
-                {% endfor %}
-            {% else %}
-                <li>No pending users to approve.</li>
-            {% endif %}
-        </ul>
-        
-    {% elif section == 'update_user' %}
-        <h2>Update User</h2>
-        <ul>
-            {% for user in users %}
-                <li>{{ user.username }} - <a href="#">Edit</a></li>
+{% block navbar %}
+    <a href="#" class="tab active">Approve User</a>
+    <a href="#" class="tab">Update User</a>
+    <a href="#" class="tab">Manage Profile</a>
+{% endblock navbar %}
+
+{% block dashboard %}
+<h2>Pending Users</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th colspan='2'>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for user in pending_users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    <form action="{% url 'approve_user' user.id %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Approve</button>
+                    </form>
+                </td>
+
+                <td>
+                    <form action="{% url 'reject_user' user.id %}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to reject this user?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No pending users to approve.</td>
+            </tr>
             {% endfor %}
-        </ul>
+        </tbody>
 
-    {% elif section == 'config_parameters' %}
-        <h2>Configuration Parameters</h2>
-        <p>Display configuration parameters here.</p>
-
-    {% elif section == 'add_parameters' %}
-        <h2>Add Parameters</h2>
-        <p>Add new parameters here.</p>
-
-    {% elif section == 'feedback_management' %}
-        <h2>Feedback Management</h2>
-        <p>Manage feedback here.</p>
-
-    {% elif section == 'approve_requests' %}
-        <h2>Approve Requests</h2>
-        <p>Approve fund requests here.</p>
-
-    {% elif section == 'edit_program' %}
-        <h2>Edit Program</h2>
-        <p>Edit program details here.</p>
-
-    {% else %}
-        <p>Update Profile.</p>
-    {% endif %}
-    
-{% endblock main_content %}
+    </table>
+{% endblock dashboard %}

@@ -132,7 +132,7 @@ def funder_dashboard(request):
 @role_required('administrator')
 @login_required
 def admin_dashboard(request):
-    return render(request, 'dashboards/admin_dashboard.html')
+    return redirect('pending_users')
 
 @login_required
 def pending_users(request):
