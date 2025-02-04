@@ -10,6 +10,25 @@ from .models import Account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+NAVBAR_CONTENT = {
+    'user_management': [
+        {'name': 'Approve User', 'tab': 'pending_users'},
+        {'name': 'Update User', 'tab': 'update_user'},
+        {'name': 'Manage Profile', 'tab': 'manage_profile'},
+    ],
+    'system_settings': [
+        {'name': 'Configuration Parameters', 'tab': 'config_parameters'},
+        {'name': 'Add Parameters', 'tab': 'add_parameters'},
+    ],
+    'feedback': [
+        {'name': 'Feedback Management', 'tab': 'feedback_management'},
+    ],
+    'fund_proposal': [
+        {'name': 'Fund Proposal', 'tab': 'approve_requests'},
+        {'name': 'Fund List', 'tab': 'edit_program'},
+    ],
+}
+
 def role_required(role_name):
     def decorator(view_func):
         def wrapper(request, *args, **kwargs):
@@ -170,15 +189,29 @@ def admin_dashboard(request):
         raise PermissionDenied("You do not have permission to access this page.")
 
     # Fetch data based on the active tab
-    context = {'active_tab': active_tab}
+    if active_tab in ['pending_users', 'update_user', 'manage_profile']:
+        active_menu = 'user_management'
+    elif active_tab in ['config_parameters', 'add_parameters']:
+        active_menu = 'system_settings'
+    elif active_tab == 'feedback_management':
+        active_menu = 'feedback'
+    elif active_tab in ['approve_requests', 'edit_program']:
+        active_menu = 'fund_proposal'
+    else:
+        active_menu = 'user_management'  # Default to "User Management"
+
+    context = {
+        'active_tab': active_tab,
+        'active_menu': active_menu,  # Pass the active menu to the template
+        'navbar_content': NAVBAR_CONTENT.get(active_menu, []),  # Pass the navbar content
+    }
+
     if active_tab == 'pending_users':
-        pending_users = Account.objects.filter(is_approved=False)
-        context['pending_users'] = pending_users
+        context['pending_users'] = Account.objects.filter(is_approved=False)
     elif active_tab == 'update_user':
-        users = Account.objects.all()
-        context['users'] = users
+        context['users'] = Account.objects.all()
     elif active_tab == 'manage_profile':
-        # not yet
+        # Not yet implemented
         pass
 
     return render(request, 'dashboards/admin_dashboard.html', context)

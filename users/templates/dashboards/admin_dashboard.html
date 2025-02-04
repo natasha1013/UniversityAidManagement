@@ -6,16 +6,26 @@
 {% endblock dashboard_title %}
 
 {% block menu %}
-    <a href="#" class="menu-item active">User Management</a>
-    <a href="#" class="menu-item">System Settings</a>
-    <a href="#" class="menu-item">Feedback</a>
-    <a href="#" class="menu-item">Fund Proposal</a>
+    <a href="{% url 'dashboard' %}?tab=pending_users" class="menu-item {% if active_menu == 'user_management' %}active{% endif %}">
+        User Management
+    </a>
+    <a href="{% url 'dashboard' %}?tab=config_parameters" class="menu-item {% if active_menu == 'system_settings' %}active{% endif %}">
+        System Settings
+    </a>
+    <a href="{% url 'dashboard' %}?tab=feedback_management" class="menu-item {% if active_menu == 'feedback' %}active{% endif %}">
+        Feedback
+    </a>
+    <a href="{% url 'dashboard' %}?tab=approve_requests" class="menu-item {% if active_menu == 'fund_proposal' %}active{% endif %}">
+        Fund Proposal
+    </a>
 {% endblock menu %}
 
 {% block navbar %}
-    <a href="{% url 'dashboard' %}?tab=pending_users" class="tab {% if active_tab == 'pending_users' %}active{% endif %}">Approve User</a>
-    <a href="{% url 'dashboard' %}?tab=update_user" class="tab {% if active_tab == 'update_user' %}active{% endif %}">Update User</a>
-    <a href="{% url 'dashboard' %}?tab=manage_profile" class="tab {% if active_tab == 'manage_profile' %}active{% endif %}">Manage Profile</a>
+    {% for item in navbar_content %}
+    <a href="{% url 'dashboard' %}?tab={{ item.tab }}" class="tab {% if active_tab == item.tab %}active{% endif %}">
+        {{ item.name }}
+    </a>
+    {% endfor %}
 {% endblock navbar %}
 
 {% block dashboard %}
