@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from .forms import *
@@ -199,7 +200,7 @@ def approve_user(request, user_id):
     user = get_object_or_404(Account, id=user_id)
     user.is_approved = True
     user.save()
-    return redirect('pending_users')
+    return redirect(f"{reverse('dashboard')}?tab=pending_users")
 
 @login_required
 def reject_user(request, user_id):
@@ -217,7 +218,16 @@ def reject_user(request, user_id):
     messages.success(request, f'User "{username}" has been rejected and removed from the system.')
     
     # Redirect back to the pending users page
-    return redirect('pending_users')
+    referer = request.META.get('HTTP_REFERER', None)  # Get the referer URL
+    if referer and 'tab=pending_users' in referer:
+        # Redirect back to the pending users tab
+        return redirect(f"{reverse('dashboard')}?tab=pending_users")
+    elif referer and 'tab=update_user' in referer:
+        # Redirect back to the update user tab
+        return redirect(f"{reverse('dashboard')}?tab=update_user")
+    else:
+        # Default fallback: redirect to the dashboard with the pending_users tab
+        return redirect(f"{reverse('dashboard')}?tab=pending_users")
 
 @login_required
 def update_user(request, user_id):
@@ -245,7 +255,7 @@ def update_user(request, user_id):
         user.save()
         messages.success(request, f'User "{user.username}" has been updated.')
 
-    return redirect('dashboard')
+    return redirect(f"{reverse('dashboard')}?tab=update_user")
 
 @login_required
 def config_parameters(request):

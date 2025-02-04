@@ -1,14 +1,13 @@
 {% load static %}
 
 <link rel="stylesheet" href="{% static 'css/modals.css' %}">
-<script src="{% static 'js/modal.js' %}"></script>
 
 <!-- Custom Modal -->
 <div id="editUserModal" class="custom-modal" style="display: none;">
     <div class="custom-modal-content">
         <div class="custom-modal-header">
             <h5>Edit User</h5>
-            <button class="custom-close-btn" onclick="closeModal()">×</button>
+            <button class="custom-close-btn">X</button>
         </div>
         <div class="custom-modal-body">
             <form id="editUserForm" method="post" action="{% url 'update_user' 0 %}">
@@ -61,7 +60,7 @@
             </form>
         </div>
         <div class="custom-modal-footer">
-            <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+            <button type="button" class="btn-secondary">Cancel</button>
             <button type="submit" form="editUserForm" class="btn-primary">Save Changes</button>
         </div>
     </div>
@@ -69,3 +68,5 @@
 
 <!-- Backdrop -->
 <div id="modalBackdrop" class="custom-modal-backdrop" style="display: none;"></div>
+
+<script src="{% static 'js/modal.js' %}"></script>
