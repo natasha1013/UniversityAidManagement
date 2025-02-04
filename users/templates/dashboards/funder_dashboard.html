@@ -6,11 +6,17 @@
 {% endblock dashboard_title %}
 
 {% block menu %}
-    <a href="#" class="menu-item active">Dashboard</a>
-    <a href="#" class="menu-item">Fund Disbursement</a>
+    <a href="{% url 'dashboard' %}?tab=edit_profile" class="menu-item {% if active_menu == 'manage_profile' %}active{% endif %}">
+        Manage Profile
+    </a>
+    <a href="{% url 'dashboard' %}?tab=status" class="menu-item {% if active_menu == 'fund_programs' %}active{% endif %}">
+        Fund Programs
+    </a>
+    <a href="{% url 'dashboard' %}?tab=aid_application" class="menu-item {% if active_menu == 'fund_disbursements' %}active{% endif %}">
+        Fund Disbursements
+    </a>
 {% endblock menu %}
 
-{% block navbar %}
-    <a href="#" class="tab active">Fund Proposal</a>
-    <a href="#" class="tab">Fund Status</a>
-{% endblock navbar %}
+{% block dashboard %}
+    <p>This is Funder's Dashboard</p>
+{% endblock dashboard %}

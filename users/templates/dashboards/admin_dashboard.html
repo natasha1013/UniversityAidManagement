@@ -20,14 +20,6 @@
     </a>
 {% endblock menu %}
 
-{% block navbar %}
-    {% for item in navbar_content %}
-    <a href="{% url 'dashboard' %}?tab={{ item.tab }}" class="tab {% if active_tab == item.tab %}active{% endif %}">
-        {{ item.name }}
-    </a>
-    {% endfor %}
-{% endblock navbar %}
-
 {% block dashboard %}
     {% if active_tab == 'pending_users' %}
         <h2>Approve Users</h2>

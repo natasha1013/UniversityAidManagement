@@ -10,23 +10,76 @@ from .models import Account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+# Navbar content for each menu item, with role-based customization
 NAVBAR_CONTENT = {
-    'user_management': [
-        {'name': 'Approve User', 'tab': 'pending_users'},
-        {'name': 'Update User', 'tab': 'update_user'},
-        {'name': 'Manage Profile', 'tab': 'manage_profile'},
-    ],
-    'system_settings': [
-        {'name': 'Configuration Parameters', 'tab': 'config_parameters'},
-        {'name': 'Add Parameters', 'tab': 'add_parameters'},
-    ],
-    'feedback': [
-        {'name': 'Feedback Management', 'tab': 'feedback_management'},
-    ],
-    'fund_proposal': [
-        {'name': 'Fund Proposal', 'tab': 'approve_requests'},
-        {'name': 'Fund List', 'tab': 'edit_program'},
-    ],
+    'administrator': {
+        'user_management': [
+            {'name': 'Approve User', 'tab': 'pending_users'},
+            {'name': 'Update User', 'tab': 'update_user'},
+            {'name': 'Manage Profile', 'tab': 'manage_profile'},
+        ],
+        'system_settings': [
+            {'name': 'Configuration Parameters', 'tab': 'config_parameters'},
+            {'name': 'Add Parameters', 'tab': 'add_parameters'},
+        ],
+        'feedback': [
+            {'name': 'Feedback Management', 'tab': 'feedback_management'},
+        ],
+        'fund_proposal': [
+            {'name': 'Fund Proposal', 'tab': 'approve_requests'},
+            {'name': 'Fund List', 'tab': 'edit_program'},
+        ],
+    },
+    'student': {
+        'homepage': [
+            {'name': 'Financial Aid', 'tab': 'financial_aid'},
+            {'name': 'Notification', 'tab': 'notification'},
+            {'name': 'Chat', 'tab': 'chat'},
+        ],
+
+        'profile': [
+            {'name': 'My Profile', 'tab': 'my_profile'},
+            {'name': 'Application Status', 'tab': 'application_status'},
+            {'name': 'Fund Utilization', 'tab': 'fund_utilization'},
+            {'name': 'Feedback', 'tab': 'feedback'},
+        ],
+    },
+    'officer': {
+        'communication': [
+            {'name': 'Chat', 'tab': 'chat'},
+            {'name': 'Feedback', 'tab': 'feedback'},
+        ],
+
+        'fund_utilizations': [
+            {'name': 'Fund Utilization', 'tab': 'fund_utilization'},
+        ],
+
+        'aid_applications': [
+            {'name': 'Aid Applications', 'tab': 'aid_application'},
+            {'name': 'Aid Requests', 'tab': 'aid_request'},
+        ],
+
+        'report': [
+            {'name': 'Impact Report', 'tab': 'impact_report'},
+        ],
+
+    },
+    'funder': {
+        'manage_profile': [
+            {'name': 'Manage Profile', 'tab': 'edit_profile'},
+        ],
+
+        'fund_programs': [
+            {'name': 'Fund Proposal Status', 'tab': 'status'},
+            {'name': 'Submit Fund Proposal', 'tab': 'fund_proposal'},
+        ],
+
+        'fund_disbursements': [
+            {'name': 'Aid Application', 'tab': 'aid_application'},
+            {'name': 'Fund Utilization', 'tab': 'fund_utilization'},
+            {'name': 'Impact Report', 'tab': 'impact_report'},
+        ],
+    },
 }
 
 def role_required(role_name):
@@ -152,7 +205,7 @@ def login(request):
 
 @login_required
 def dashboard(request):
-        # Map roles to their respective dashboard functions
+    # Map roles to their respective dashboard functions
     role_dashboard_map = {
         'administrator': admin_dashboard,
         'student': student_dashboard,
@@ -175,7 +228,27 @@ def dashboard(request):
 @role_required('funder')
 @login_required
 def funder_dashboard(request):
-    return render(request, 'dashboards/funder_dashboard.html')
+    active_tab = request.GET.get('tab', 'edit_profile')
+
+    # Determine the active menu based on the tab or other logic
+    active_menu = 'manage_profile'  # Default menu for administrators
+    if active_tab in ['status', 'fund_proposal']:
+        active_menu = 'fund_programs'
+    elif active_tab in ['aid_application', 'fund_utilization', 'impact_report']:
+        active_menu = 'fund_disbursements'
+
+    # Fetch role-specific navbar content
+    user_role = request.user.role
+    navbar_content = NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
+
+    # Fetch data based on the active tab
+    context = {
+        'active_tab': active_tab,
+        'active_menu': active_menu,  # Pass the active menu to the template
+        'navbar_content': navbar_content,  # Pass the navbar content
+    }
+
+    return render(request, 'dashboards/funder_dashboard.html', context)
 
 # admin-only views
 @role_required('administrator')
@@ -184,28 +257,25 @@ def admin_dashboard(request):
     # Get the 'tab' query parameter (default to 'pending_users')
     active_tab = request.GET.get('tab', 'pending_users')
 
-    # Ensure the user has administrator privileges
-    if request.user.role != 'administrator':
-        raise PermissionDenied("You do not have permission to access this page.")
-
-    # Fetch data based on the active tab
-    if active_tab in ['pending_users', 'update_user', 'manage_profile']:
-        active_menu = 'user_management'
-    elif active_tab in ['config_parameters', 'add_parameters']:
+    # Determine the active menu based on the tab or other logic
+    active_menu = 'user_management'  # Default menu for administrators
+    if active_tab in ['config_parameters', 'add_parameters']:
         active_menu = 'system_settings'
     elif active_tab == 'feedback_management':
         active_menu = 'feedback'
     elif active_tab in ['approve_requests', 'edit_program']:
         active_menu = 'fund_proposal'
-    else:
-        active_menu = 'user_management'  # Default to "User Management"
 
+    # Fetch role-specific navbar content
+    user_role = request.user.role
+    navbar_content = NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
+
+    # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
         'active_menu': active_menu,  # Pass the active menu to the template
-        'navbar_content': NAVBAR_CONTENT.get(active_menu, []),  # Pass the navbar content
+        'navbar_content': navbar_content,  # Pass the navbar content
     }
-
     if active_tab == 'pending_users':
         context['pending_users'] = Account.objects.filter(is_approved=False)
     elif active_tab == 'update_user':
@@ -319,12 +389,56 @@ def edit_program(request):
 @role_required('officer')
 @login_required
 def officer_dashboard(request):
-    return render(request, 'dashboards/officer_dashboard.html')
+    active_tab = request.GET.get('tab', 'chat')
+
+    # Determine the active menu based on the tab or other logic
+    active_menu = 'communication'
+    if active_tab in ['chat', 'feedback']:
+        active_menu = 'communication'
+    elif active_tab in ['fund_utilization']:
+        active_menu = 'fund_utilizations'
+    elif active_tab in ['aid_application', 'aid_request']:
+        active_menu = 'aid_applications'
+    elif active_tab in ['impact_report']:
+        active_menu = 'report'
+
+    # Fetch role-specific navbar content
+    user_role = request.user.role
+    navbar_content = NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
+
+    # Fetch data based on the active tab
+    context = {
+        'active_tab': active_tab,
+        'active_menu': active_menu,  # Pass the active menu to the template
+        'navbar_content': navbar_content,  # Pass the navbar content
+    }
+
+    return render(request, 'dashboards/officer_dashboard.html', context)
 
 @role_required('student')
 @login_required
 def student_dashboard(request):
-    return render(request, 'dashboards/dashboard.html')
+    active_tab = request.GET.get('tab', 'financial_aid')
+
+    # Determine the active menu based on the tab or other logic
+    active_menu = 'homepage'
+    if active_tab in ['financial_aid', 'notification', 'chat']:
+        active_menu = 'homepage'
+    elif active_tab in ['my_profile', 'application_status', 'fund_utilization', 'feedback']:
+        active_menu = 'profile'
+
+    # Fetch role-specific navbar content
+    user_role = request.user.role
+    navbar_content = NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
+
+    # Fetch data based on the active tab
+    context = {
+        'active_tab': active_tab,
+        'active_menu': active_menu,  # Pass the active menu to the template
+        'navbar_content': navbar_content,  # Pass the navbar content
+    }
+
+    return render(request, 'dashboards/dashboard.html', context)
 
 # logout 
 @login_required
