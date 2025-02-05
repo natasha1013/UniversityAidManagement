@@ -334,8 +334,6 @@ def reject_user(request, user_id):
 
 @login_required
 def update_user(request, user_id):
-    if request.user.role != 'administrator':
-        raise PermissionDenied("You do not have permission to access this page.")
 
     user = get_object_or_404(Account, id=user_id)
 
@@ -358,8 +356,17 @@ def update_user(request, user_id):
         user.save()
         messages.success(request, f'User "{user.username}" has been updated.')
 
-    return redirect(f"{reverse('dashboard')}?tab=update_user")
-
+    # return redirect(f"{reverse('dashboard')}?tab=update_user")
+    referer = request.META.get('HTTP_REFERER', None)  # Get the referer URL
+    if referer and 'tab=my_profile' in referer:
+        # Redirect back to the pending users tab
+        return redirect(f"{reverse('dashboard')}?tab=my_profile")
+    elif referer and 'tab=update_user' in referer:
+        # Redirect back to the update user tab
+        return redirect(f"{reverse('dashboard')}?tab=update_user")
+    elif referer and 'tab=edit_profile' in referer:
+        return redirect(f"{reverse('dashboard')}?tab=edit_profile")
+    
 @login_required
 def config_parameters(request):
     # Example: Fetch configuration parameters
@@ -437,6 +444,11 @@ def student_dashboard(request):
         'active_menu': active_menu,  # Pass the active menu to the template
         'navbar_content': navbar_content,  # Pass the navbar content
     }
+
+    if active_tab == 'my_profile':
+        # Fetch the logged-in user's data
+        logged_in_user = request.user  # Get the currently logged-in user
+        context['user_profile'] = logged_in_user  # Pass the user's profile to the template
 
     return render(request, 'dashboards/dashboard.html', context)
 

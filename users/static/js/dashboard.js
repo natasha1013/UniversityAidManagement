@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Fetch user data from the API
             const user = await fetchUserData(userId);
             if (user) {
-                populateModal(user);
+                setTimeout(() => populateModal(user), 100);
             }
         });
     });
@@ -71,13 +71,14 @@ async function fetchUserData(userId) {
 
 // Function to populate the modal with user data
 function populateModal(user) {
+    console.log("Populating modal with user data:", user);
     // Populate common fields
     document.getElementById('userId').value = user.id;
-    document.getElementById('username').value = user.username;
-    document.getElementById('first_name').value = user.first_name || '';
-    document.getElementById('last_name').value = user.last_name || '';
-    document.getElementById('email').value = user.email || '';
-    document.getElementById('phone_number').value = user.phone_number || '';
+    document.getElementById('modal-username').value = user.username;
+    document.getElementById('modal-first_name').value = user.first_name || '';
+    document.getElementById('modal-last_name').value = user.last_name || '';
+    document.getElementById('modal-email').value = user.email || '';
+    document.getElementById('modal-phone_number').value = user.phone_number || '';
 
     // Clear and hide role-specific fields
     document.getElementById('studentFields').style.display = 'none';
@@ -86,12 +87,12 @@ function populateModal(user) {
     // Show fields based on role
     if (user.role === 'student') {
         document.getElementById('studentFields').style.display = 'block';
-        document.getElementById('study_program').value = user.study_program || '';
-        document.getElementById('years_of_study').value = user.years_of_study || '';
-        document.getElementById('gpa').value = user.gpa || '';
+        document.getElementById('modal-study_program').value = user.study_program || '';
+        document.getElementById('modal-years_of_study').value = user.years_of_study || '';
+        document.getElementById('modal-gpa').value = user.gpa || '';
     } else if (user.role === 'funder') {
         document.getElementById('funderFields').style.display = 'block';
-        document.getElementById('organization_name').value = user.organization_name || '';
+        document.getElementById('modal-organization_name').value = user.organization_name || '';
     }
 
     // Update the form action URL to include the user ID

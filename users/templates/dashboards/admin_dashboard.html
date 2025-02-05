@@ -102,11 +102,42 @@
 
         </table>
 
-        {% include 'others/profilemodal.html' %}
-
     {% elif active_tab == 'manage_profile' %}
-        <h2>Manage Profile</h2>
-    
+        <!-- Profile Details -->
+        <section class="profile-details">
+            <div class="profile-header">
+                <h2>Profile Details</h2>
+                <!--<button class="action-button">Edit</button>-->
+                <button class="action-button edit-btn" data-user-id="{{ request.user.id }}" data-bs-toggle="modal" data-bs-target="#editUserModal">Edit</button>
+            </div>
+            <div class="details">
+                <form>
+                    <div class="form-group full-width">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="{{user.username}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="fullname">First Name</label>
+                        <input type="text" id="fullname" placeholder="{{user.first_name}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentid">Last Name</label>
+                        <input type="text" id="lastname" placeholder="{{user.last_name}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="{{user.email}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone_number">Contact Number</label>
+                        <input type="tel" name="phone_number" placeholder="{{user.phone_number}}" readonly>
+                    </div>
+                </form>
+            </div>
+        </section> <!-- Close Profile Details Section -->
+
+        
     {% endif %}
 
+    {% include 'others/profilemodal.html' %}
 {% endblock dashboard %}

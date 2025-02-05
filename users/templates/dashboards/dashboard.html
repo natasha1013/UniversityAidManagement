@@ -53,33 +53,45 @@
                     <section class="profile-details">
                         <div class="profile-header">
                             <h2>Profile Details</h2>
-                            <button class="action-button">Edit</button>
+                            <!--<button class="action-button">Edit</button>-->
+                            <button class="action-button edit-btn" data-user-id="{{ request.user.id }}" data-bs-toggle="modal" data-bs-target="#editUserModal">Edit</button>
                         </div>
                         <div class="details">
                             <form>
-                                <div class="form-group">
-                                    <label for="fullname">Full Name</label>
-                                    <input type="text" id="fullname" placeholder="Full Name" readonly>
+                                <div class="form-group full-width">
+                                    <label for="username">Username</label>
+                                    <input type="text" id="username" placeholder="{{user.username}}" readonly>
                                 </div>
                                 <div class="form-group">
-                                    <label for="studentid">Student ID</label>
-                                    <input type="text" id="studentid" placeholder="12223445" readonly>
+                                    <label for="fullname">First Name</label>
+                                    <input type="text" id="fullname" placeholder="{{user.first_name}}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="studentid">Last Name</label>
+                                    <input type="text" id="lastname" placeholder="{{user.last_name}}" readonly>
                                 </div>
                                 <div class="form-group">
                                     <label for="email">Email</label>
-                                    <input type="email" id="email" placeholder="email@mail.com" readonly>
+                                    <input type="email" id="email" placeholder="{{user.email}}" readonly>
                                 </div>
                                 <div class="form-group">
                                     <label for="phone_number">Contact Number</label>
-                                    <input type="tel" name="phone_number" placeholder="+60" readonly>
+                                    <input type="tel" name="phone_number" placeholder="{{user.phone_number}}" readonly>
                                 </div>
-                                <div class="form-group full-width">
+                                <div class="form-group">
                                     <label for="years_of_study">Years of Study</label>
-                                    <input type="text" id="years_of_study" placeholder="3 years" readonly>
+                                    <input type="text" id="years_of_study" placeholder="{{user.years_of_study}}" readonly>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="years_of_study">Study Program</label>
+                                    <input type="text" id="study_program" placeholder="{{user.study_program}}" readonly>
                                 </div>
                             </form>
                         </div>
                     </section> <!-- Close Profile Details Section -->
+
+                    {% include 'others/profilemodal.html' %}
 
                     <!-- Impact Report Section -->
                     <section class="impact-report">
