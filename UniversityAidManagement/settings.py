@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
     # created
     'users',
+    'feedbacks',
 ]
 
 MIDDLEWARE = [
@@ -122,6 +123,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'users/static/',
+    BASE_DIR / 'feedbacks/static/',
     BASE_DIR / 'static/',
 ]
 
