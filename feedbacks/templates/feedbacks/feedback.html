@@ -1,0 +1,121 @@
+<!-- feedbacks/templates/feedbacks/feedback.html -->
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    Feedback
+{% endblock title %}
+{% block static %}
+    <link rel="stylesheet" href="{% static 'css/feedbacks.css' %}">
+{% endblock static %}
+{% block content %}
+    <h1>Feedback</h1>
+
+    <!-- Tabs for Navigation -->
+    <div class="actions">
+        <button onclick="openModal('send-feedback')">Send Feedback</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <button onclick="filterFeedback('all')">All</button>
+        <button onclick="filterFeedback('sent')">Sent</button>
+        <button onclick="filterFeedback('received')">Received</button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search feedback..." onkeyup="filterFeedback()">
+    </div>
+
+    <!-- Combined Feedback Table -->
+    <!-- Combined Feedback Table -->
+    <table id="feedback-table">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Title</th>
+                <th>From/To</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in feedback_list %}
+                <tr class="feedback-row {% if item.type == 'Sent' %}sent{% else %}received{% endif %}">
+                    <td>{{ item.type }}</td>
+                    <td><a href="?tab=view&id={{ item.feedback.id }}">{{ item.feedback.title }}</a></td>
+                    <td>
+                        {% if item.type == 'Sent' %}
+                            To: {{ item.feedback.receiver.username }}
+                        {% else %}
+                            From: {{ item.feedback.sender.username }}
+                        {% endif %}
+                    </td>
+                    <td>{{ item.feedback.created_at }}</td>
+                    <td>
+                        {% if not item.feedback.is_read and item.feedback.receiver == request.user %}
+                            <strong>Unread</strong>
+                        {% else %}
+                            Read
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.feedback.receiver == request.user %}
+                            <a href="?tab=reply&id={{ item.feedback.id }}">Reply</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">No feedback available.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Reply Modal -->
+    {% if tab == 'reply' %}
+        <div id="reply-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('reply-modal')">&times;</span>
+                <h2>Reply to Feedback</h2>
+                <form method="post" action="{% url 'reply_feedback' feedback.id %}">
+                    {% csrf_token %}
+                    <label for="message">Message:</label>
+                    <textarea name="message" required></textarea>
+                    <button type="submit">Send Reply</button>
+                </form>
+            </div>
+        </div>
+        <script>
+            document.getElementById('reply-modal').style.display = 'block';
+        </script>
+    {% endif %}
+
+    <!-- Send Feedback Modal -->
+    <div id="send-feedback" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('send-feedback')">&times;</span>
+            <h2>Send Feedback</h2>
+            <form method="post" action="{% url 'send_feedback' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="id_title">Title:</label>
+                <input type="text" name="title" required>
+                <label for="id_message">Message:</label>
+                <textarea name="message" required></textarea>
+                <label for="id_category">Category:</label>
+                <select name="category" required>
+                    <option value="system/application">System/Application</option>
+                    <option value="aid_programs">Aid Programs</option>
+                </select>
+                <label for="id_attachment">Attachment (optional):</label>
+                <input type="file" name="attachment">
+                <button type="submit">Send Feedback</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{% static 'js/feedbacks.js' %}"></script>
+{% endblock content %}
