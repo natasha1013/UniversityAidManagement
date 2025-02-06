@@ -1,25 +1,98 @@
-<!-- feedbacks/templates/feedbacks/feedback.html -->
-{% extends "base.html" %}
-{% load static %}
-{% block title %}
-    Feedback
-{% endblock title %}
-{% block static %}
-    <link rel="stylesheet" href="{% static 'css/feedbacks.css' %}">
-{% endblock static %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .actions, .filters, .search-bar {
+            margin-bottom: 20px;
+        }
+        .filters select {
+            padding: 5px;
+            margin-left: 10px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        table th {
+            background-color: #f4f4f4;
+        }
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .hidden {
+            display: none;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
     <h1>Feedback</h1>
 
-    <!-- Tabs for Navigation -->
+    <!-- Actions -->
     <div class="actions">
         <button onclick="openModal('send-feedback')">Send Feedback</button>
     </div>
 
     <!-- Filters -->
     <div class="filters">
-        <button onclick="filterFeedback('all')">All</button>
-        <button onclick="filterFeedback('sent')">Sent</button>
-        <button onclick="filterFeedback('received')">Received</button>
+        <label for="filter-dropdown">Filter:</label>
+        <select id="filter-dropdown" onchange="filterFeedback(this.value)">
+            <option value="all">All</option>
+            <option value="sent">Sent</option>
+            <option value="received">Received</option>
+        </select>
     </div>
 
     <!-- Search Bar -->
@@ -27,7 +100,6 @@
         <input type="text" id="search-input" placeholder="Search feedback..." onkeyup="filterFeedback()">
     </div>
 
-    <!-- Combined Feedback Table -->
     <!-- Combined Feedback Table -->
     <table id="feedback-table">
         <thead>
@@ -117,5 +189,58 @@
     </div>
 
     <!-- JavaScript -->
-    <script src="{% static 'js/feedbacks.js' %}"></script>
-{% endblock content %}
+    <script>
+        // Function to open a modal
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'block';
+            }
+        }
+
+        // Function to close a modal
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Automatically open the reply modal if the tab is set to 'reply'
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            if (tab === 'reply') {
+                openModal('reply-modal');
+            }
+        });
+
+        // Close modal when clicking outside of it
+        window.onclick = function (event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(function (modal) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+
+        // Filter feedback rows based on dropdown and search query
+        function filterFeedback(filterType = 'all') {
+            const rows = document.querySelectorAll('#feedback-table tbody tr.feedback-row');
+            const searchInput = document.getElementById('search-input').value.toLowerCase();
+
+            rows.forEach(row => {
+                const type = row.classList.contains('sent') ? 'sent' : 'received';
+                const title = row.querySelector('td:nth-child(2)').innerText.toLowerCase();
+                const fromTo = row.querySelector('td:nth-child(3)').innerText.toLowerCase();
+
+                const matchesFilter = filterType === 'all' || type === filterType;
+                const matchesSearch = title.includes(searchInput) || fromTo.includes(searchInput);
+
+                row.style.display = matchesFilter && matchesSearch ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

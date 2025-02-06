@@ -136,7 +136,10 @@
             </div>
         </section> <!-- Close Profile Details Section -->
 
-        
+    {% elif active_tab == 'feedback_management' %}
+
+        {%include "feedbacks/feedback.html"%}
+
     {% endif %}
 
     {% include 'others/profilemodal.html' %}

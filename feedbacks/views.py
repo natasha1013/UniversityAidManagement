@@ -37,15 +37,6 @@ def feedback_view(request):
             'feedback_list': feedback_list,
         })
 
-    # Handle replying to feedback
-    if tab == 'reply' and feedback_id:
-        feedback = get_object_or_404(Feedback, id=feedback_id, receiver=request.user)
-        return render(request, 'feedbacks/feedback.html', {
-            'tab': tab,
-            'feedback': feedback,
-            'feedback_list': feedback_list,
-        })
-
     # Default view: Show the combined feedback table
     return render(request, 'feedbacks/feedback.html', {
         'tab': tab,
