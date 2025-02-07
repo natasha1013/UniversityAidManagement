@@ -90,10 +90,7 @@ def send_feedback(request):
             if category == 'system/application':
                 feedback.receiver = Account.objects.filter(role='administrator').first()
             elif category == 'aid_programs':
-                feedback.receiver = (
-                    Account.objects.filter(role='officer').first() or
-                    Account.objects.filter(role='funder').first()
-                )
+                feedback.receiver = Account.objects.filter(role='officer').first()
 
             feedback.save()
 

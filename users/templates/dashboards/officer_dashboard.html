@@ -21,5 +21,7 @@
 {% endblock menu %}
 
 {% block dashboard %}
-    <p>This is Officer's Dashboard</p>
+    {% if active_tab == 'feedback'%}
+        {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}
+    {% endif %}
 {% endblock dashboard %}

@@ -431,11 +431,21 @@ def officer_dashboard(request):
     user_role = request.user.role
     navbar_content = NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
 
+    feedback_entries = Feedback.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user)
+    ).order_by('-created_at')
+
+    feedback_list = [
+        {'feedback': feedback, 'type': 'Sent' if feedback.sender == request.user else 'Received'}
+        for feedback in feedback_entries
+    ]
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
         'active_menu': active_menu,  # Pass the active menu to the template
         'navbar_content': navbar_content,  # Pass the navbar content
+        'feedback_list' : feedback_list,
     }
 
     return render(request, 'dashboards/officer_dashboard.html', context)
