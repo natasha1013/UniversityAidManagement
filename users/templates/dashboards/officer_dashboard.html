@@ -23,5 +23,9 @@
 {% block dashboard %}
     {% if active_tab == 'feedback'%}
         {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}
+    {% elif active_tab == 'notification'%}
+        {% include "notifications/list.html" %}
+        
     {% endif %}
+
 {% endblock dashboard %}

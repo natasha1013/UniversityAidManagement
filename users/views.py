@@ -25,6 +25,7 @@ NAVBAR_CONTENT = {
         'system_settings': [
             {'name': 'Configuration Parameters', 'tab': 'config_parameters'},
             {'name': 'Add Parameters', 'tab': 'add_parameters'},
+            {'name': 'Notification', 'tab': 'notification'},
         ],
         'feedback': [
             {'name': 'Feedback Management', 'tab': 'feedback_management'},
@@ -52,6 +53,7 @@ NAVBAR_CONTENT = {
         'communication': [
             {'name': 'Chat', 'tab': 'chat'},
             {'name': 'Feedback', 'tab': 'feedback'},
+            {'name': 'Notification', 'tab': 'notification'},
         ],
 
         'fund_utilizations': [
@@ -263,7 +265,7 @@ def admin_dashboard(request):
 
     # Determine the active menu based on the tab or other logic
     active_menu = 'user_management'  # Default menu for administrators
-    if active_tab in ['config_parameters', 'add_parameters']:
+    if active_tab in ['config_parameters', 'add_parameters', 'notification']:
         active_menu = 'system_settings'
     elif active_tab == 'feedback_management':
         active_menu = 'feedback'
@@ -283,12 +285,15 @@ def admin_dashboard(request):
         for feedback in feedback_entries
     ]
 
+    notifications_list = Notification.objects.filter(user=request.user).order_by('-created_at')
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
         'active_menu': active_menu,  # Pass the active menu to the template
         'navbar_content': navbar_content,  # Pass the navbar content
         'feedback_list' : feedback_list,
+        'notifications_list': notifications_list,
     }
 
     
@@ -419,7 +424,7 @@ def officer_dashboard(request):
 
     # Determine the active menu based on the tab or other logic
     active_menu = 'communication'
-    if active_tab in ['chat', 'feedback']:
+    if active_tab in ['chat', 'feedback', 'notification']:
         active_menu = 'communication'
     elif active_tab in ['fund_utilization']:
         active_menu = 'fund_utilizations'
@@ -441,12 +446,15 @@ def officer_dashboard(request):
         for feedback in feedback_entries
     ]
 
+    notifications_list = Notification.objects.filter(user=request.user).order_by('-created_at')
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
         'active_menu': active_menu,  # Pass the active menu to the template
         'navbar_content': navbar_content,  # Pass the navbar content
         'feedback_list' : feedback_list,
+        'notifications_list': notifications_list,
     }
 
     return render(request, 'dashboards/officer_dashboard.html', context)
