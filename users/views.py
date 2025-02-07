@@ -6,9 +6,12 @@ from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from .forms import *
+from django.db.models import Q
 from .models import Account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from feedbacks.models import Feedback
+
 
 # Navbar content for each menu item, with role-based customization
 NAVBAR_CONTENT = {
@@ -270,12 +273,25 @@ def admin_dashboard(request):
     user_role = request.user.role
     navbar_content = NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
 
+    feedback_entries = Feedback.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user)
+    ).order_by('-created_at')
+
+    feedback_list = [
+        {'feedback': feedback, 'type': 'Sent' if feedback.sender == request.user else 'Received'}
+        for feedback in feedback_entries
+    ]
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
         'active_menu': active_menu,  # Pass the active menu to the template
         'navbar_content': navbar_content,  # Pass the navbar content
+        'feedback_list' : feedback_list,
     }
+
+    
+
     if active_tab == 'pending_users':
         context['pending_users'] = Account.objects.filter(is_approved=False)
     elif active_tab == 'update_user':
@@ -283,7 +299,9 @@ def admin_dashboard(request):
     elif active_tab == 'manage_profile':
         # Not yet implemented
         pass
-
+    elif active_tab == 'feedback_management':
+        # context['feedback_list'] = feedback_list  # Fetch all feedback entries
+        pass
     return render(request, 'dashboards/admin_dashboard.html', context)
 
 @login_required

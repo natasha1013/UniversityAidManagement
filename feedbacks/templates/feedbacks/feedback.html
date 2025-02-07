@@ -100,7 +100,7 @@
         <input type="text" id="search-input" placeholder="Search feedback..." onkeyup="filterFeedback()">
     </div>
 
-    <!-- Combined Feedback Table -->
+    <!-- Feedback Table -->
     <table id="feedback-table">
         <thead>
             <tr>
@@ -116,7 +116,9 @@
             {% for item in feedback_list %}
                 <tr class="feedback-row {% if item.type == 'Sent' %}sent{% else %}received{% endif %}">
                     <td>{{ item.type }}</td>
-                    <td><a href="?tab=view&id={{ item.feedback.id }}">{{ item.feedback.title }}</a></td>
+                    <td>
+                        <a href="#" onclick="showFeedbackContent('{{ item.feedback.id }}', '{{ item.feedback.title|escapejs }}', '{{ item.feedback.message|escapejs }}')">{{ item.feedback.title }}</a>
+                    </td>
                     <td>
                         {% if item.type == 'Sent' %}
                             To: {{ item.feedback.receiver.username }}
@@ -125,7 +127,7 @@
                         {% endif %}
                     </td>
                     <td>{{ item.feedback.created_at }}</td>
-                    <td>
+                    <td id="status-{{item.feedback.id}}">
                         {% if not item.feedback.is_read and item.feedback.receiver == request.user %}
                             <strong>Unread</strong>
                         {% else %}
@@ -134,7 +136,7 @@
                     </td>
                     <td>
                         {% if item.feedback.receiver == request.user %}
-                            <a href="?tab=reply&id={{ item.feedback.id }}">Reply</a>
+                            <a href="#" onclick="openReplyModal({{ item.feedback.id }})">Reply</a>
                         {% endif %}
                     </td>
                 </tr>
@@ -147,23 +149,27 @@
     </table>
 
     <!-- Reply Modal -->
-    {% if tab == 'reply' %}
-        <div id="reply-modal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('reply-modal')">&times;</span>
-                <h2>Reply to Feedback</h2>
-                <form method="post" action="{% url 'reply_feedback' feedback.id %}">
-                    {% csrf_token %}
-                    <label for="message">Message:</label>
-                    <textarea name="message" required></textarea>
-                    <button type="submit">Send Reply</button>
-                </form>
-            </div>
+    <div id="reply-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('reply-modal')">&times;</span>
+            <h2>Reply to Feedback</h2>
+            <form method="post" action="" id="reply-form">
+                {% csrf_token %}
+                <label for="message">Message:</label>
+                <textarea name="message" required></textarea>
+                <button type="submit">Send Reply</button>
+            </form>
         </div>
-        <script>
-            document.getElementById('reply-modal').style.display = 'block';
-        </script>
-    {% endif %}
+    </div>
+
+    <!-- Feedback Content Modal -->
+    <div id="feedback-content-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('feedback-content-modal')">&times;</span>
+            <h2>Feedback Content</h2>
+            <div id="feedback-content"></div>
+        </div>
+    </div>
 
     <!-- Send Feedback Modal -->
     <div id="send-feedback" class="modal hidden">
@@ -206,14 +212,66 @@
             }
         }
 
-        // Automatically open the reply modal if the tab is set to 'reply'
-        document.addEventListener('DOMContentLoaded', function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const tab = urlParams.get('tab');
-            if (tab === 'reply') {
+        // Open the reply modal and set the form action URL
+        function openReplyModal(feedbackId) {
+            const modal = document.getElementById('reply-modal');
+            const form = document.getElementById('reply-form');
+            if (modal && form) {
+                form.action = `/feedbacks/reply/${feedbackId}/`; // Update the form action URL
                 openModal('reply-modal');
             }
-        });
+        }
+
+        // Show feedback content in a modal
+        function showFeedbackContent(feedbackId, title, message) {
+            const modal = document.getElementById('feedback-content-modal');
+            const contentDiv = document.getElementById('feedback-content');
+            if (modal && contentDiv) {
+                contentDiv.innerHTML = `
+                    <h3>${title}</h3>
+                    <p>${message}</p>
+                `;
+                openModal('feedback-content-modal');
+
+                // Mark the feedback as read via an AJAX request
+                fetch(`/feedbacks/mark-as-read/${feedbackId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // Include CSRF token for POST requests
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        const statusElement = document.getElementById(`status-${feedbackId}`);
+                        if (statusElement) {
+                            statusElement.innerHTML = "Read";
+                        }
+                    } else {
+                        console.error('Failed to mark feedback as read.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error marking feedback as read:', error);
+                });
+            }
+        }
+        
+        // Helper function to get the CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
 
         // Close modal when clicking outside of it
         window.onclick = function (event) {
@@ -229,15 +287,12 @@
         function filterFeedback(filterType = 'all') {
             const rows = document.querySelectorAll('#feedback-table tbody tr.feedback-row');
             const searchInput = document.getElementById('search-input').value.toLowerCase();
-
             rows.forEach(row => {
                 const type = row.classList.contains('sent') ? 'sent' : 'received';
                 const title = row.querySelector('td:nth-child(2)').innerText.toLowerCase();
                 const fromTo = row.querySelector('td:nth-child(3)').innerText.toLowerCase();
-
                 const matchesFilter = filterType === 'all' || type === filterType;
                 const matchesSearch = title.includes(searchInput) || fromTo.includes(searchInput);
-
                 row.style.display = matchesFilter && matchesSearch ? '' : 'none';
             });
         }

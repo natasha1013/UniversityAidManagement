@@ -20,7 +20,7 @@ class Feedback(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.title} - from {self.sender.username} to {self.receiver.username}"
+        return self.title
 
     class Meta:
         db_table = 'feedback'

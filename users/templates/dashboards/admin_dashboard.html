@@ -138,7 +138,7 @@
 
     {% elif active_tab == 'feedback_management' %}
 
-        {%include "feedbacks/feedback.html"%}
+        {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}
 
     {% endif %}
 
