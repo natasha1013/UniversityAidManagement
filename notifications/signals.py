@@ -3,6 +3,7 @@ from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from .models import Notification
 from users.models import Account
+from feedbacks.models import Feedback
 
 User = get_user_model()
 
@@ -103,3 +104,16 @@ def send_profile_update_notification(sender, instance, created, **kwargs):
     if changes:
         message = "Your profile has been updated. Changes: " + ", ".join(changes)
         Notification.objects.create(user=instance, message=message)
+
+@receiver(post_save, sender=Feedback)
+def send_feedback_notification(sender, instance, created, **kwargs):
+    """
+    Sends a notification when a new feedback is created.
+    """
+    if created:
+        # Create a notification for the receiver
+        Notification.objects.create(
+            user=instance.receiver,
+            message=f"You have received new feedback titled '{instance.title}' "
+                    f"in the category '{instance.get_category_display()}' from {instance.sender.username}."
+        )
