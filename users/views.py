@@ -11,6 +11,7 @@ from .models import Account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from feedbacks.models import Feedback
+from notifications.models import Notification
 
 
 # Navbar content for each menu item, with role-based customization
@@ -475,12 +476,15 @@ def student_dashboard(request):
         for feedback in feedback_entries
     ]
 
+    notifications_list = Notification.objects.filter(user=request.user).order_by('-created_at')
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
         'active_menu': active_menu,  # Pass the active menu to the template
         'navbar_content': navbar_content,  # Pass the navbar content
         'feedback_list' : feedback_list,
+        'notifications_list': notifications_list,
     }
 
     if active_tab == 'my_profile':

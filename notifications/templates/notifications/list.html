@@ -35,9 +35,9 @@
     </style>
 </head>
 <body>
-    <h1>Your Notifications</h1>
+    <h1>{{request.user.username}}'s notifications</h1>
     
-    {% if notifications %}
+    {% if notifications_list %}
         <table>
             <thead>
                 <tr>
@@ -47,7 +47,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for notification in notifications %}
+                {% for notification in notifications_list %}
                     <tr class="{% if not notification.read %}unread{% else %}read{% endif %}">
                         <td>{% if not notification.read %} 🔴 Unread {% else %} ✅ Read {% endif %}</td>
                         <td>{{ notification.message }}</td>
