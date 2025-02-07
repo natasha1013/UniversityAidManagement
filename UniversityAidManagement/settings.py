@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'users',
     'feedbacks',
     'chats',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -126,6 +127,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'users/static/',
     BASE_DIR / 'feedbacks/static/',
     BASE_DIR / 'chats/static/',
+    BASE_DIR / 'notifications/static/',
     BASE_DIR / 'static/',
 ]
 

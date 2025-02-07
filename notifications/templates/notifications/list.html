@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <style>
+        .unread {
+            font-weight: bold;
+        }
+        .read {
+            color: gray;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Notifications</h1>
+    {% if notifications %}
+        <ul>
+            {% for notification in notifications %}
+                <li class="{% if not notification.read %}unread{% else %}read{% endif %}">
+                    {{ notification.message }}
+                    {% if not notification.read %}
+                        <a href="{% url 'notifications:mark_as_read' notification.id %}" class="button">Mark as Read</a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No notifications yet.</p>
+    {% endif %}
+</body>
+</html>
