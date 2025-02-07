@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notifications</title>
     <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
         .unread {
             font-weight: bold;
         }
@@ -17,22 +30,38 @@
             padding: 5px 10px;
             text-decoration: none;
             border-radius: 5px;
+            display: inline-block;
         }
     </style>
 </head>
 <body>
     <h1>Your Notifications</h1>
+    
     {% if notifications %}
-        <ul>
-            {% for notification in notifications %}
-                <li class="{% if not notification.read %}unread{% else %}read{% endif %}">
-                    {{ notification.message }}
-                    {% if not notification.read %}
-                        <a href="{% url 'notifications:mark_as_read' notification.id %}" class="button">Mark as Read</a>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
+        <table>
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>Message</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for notification in notifications %}
+                    <tr class="{% if not notification.read %}unread{% else %}read{% endif %}">
+                        <td>{% if not notification.read %} 🔴 Unread {% else %} ✅ Read {% endif %}</td>
+                        <td>{{ notification.message }}</td>
+                        <td>
+                            {% if not notification.read %}
+                                <a href="{% url 'notifications:mark_as_read' notification.id %}" class="button">Mark as Read</a>
+                            {% else %}
+                                ---
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% else %}
         <p>No notifications yet.</p>
     {% endif %}
