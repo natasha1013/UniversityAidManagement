@@ -97,9 +97,17 @@ def send_feedback(request):
 
             feedback.save()
 
-            return redirect(request.META.get('HTTP_REFERER', '/profile/?tab=feedback_management'))
+            if feedback.receiver:
+                feedback.save()
+                return redirect(request.META.get('HTTP_REFERER', '/profile/?tab=feedback_management'))
+            else:
+                # Show error if no valid receiver is found
+                return render(request, 'feedbacks/feedback.html', {
+                    'form': form,
+                    'error': 'No valid receiver found for this category. Please try again later.',
+                })
         
-    return redirect('/profile/?tab=feedback_management')
+    return redirect('/profile/?tab=feedback')
 
 
 @login_required
@@ -121,6 +129,10 @@ def reply_feedback(request, feedback_id):
             category=feedback.category,
         )
 
-        return redirect(request.META.get('HTTP_REFERER', '/profile/?tab=feedback_management'))
+        if Account.objects.filter(role='administrator'):
+            return redirect(request.META.get('HTTP_REFERER', '/profile/?tab=feedback_management'))
+        else:
+            return redirect(request.META.get('HTTP_REFERER', '/profile/?tab=feedback'))
+
 
     return redirect('/profile/?tab=reply&id={feedback_id}')

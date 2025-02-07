@@ -138,6 +138,8 @@
                             <button type="submit" class="delete-button">Continue</button>
                         </form>
                     </div> <!-- Close Delete Account Section -->
+                {% elif active_tab == 'feedback' %}
+                    {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}
                 {% endif %}
             {% endblock dashboard %}
         </main>
