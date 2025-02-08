@@ -146,6 +146,9 @@
     {% elif active_tab == 'config_parameters' %}
         {% include "systemlogs/system_log.html" %}
 
+    {% elif active_tab == 'chat' %}
+        {% include "chats/chat.html" %}
+        
     {% endif %}
 
     {% include 'others/profilemodal.html' %}

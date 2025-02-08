@@ -30,6 +30,7 @@ NAVBAR_CONTENT = {
             {'name': 'Configuration Parameters', 'tab': 'config_parameters'},
             {'name': 'Add Parameters', 'tab': 'add_parameters'},
             {'name': 'Notification', 'tab': 'notification'},
+            {'name': 'Chat', 'tab': 'chat'},
         ],
         'feedback': [
             {'name': 'Feedback Management', 'tab': 'feedback_management'},
@@ -269,7 +270,7 @@ def admin_dashboard(request):
 
     # Determine the active menu based on the tab or other logic
     active_menu = 'user_management'  # Default menu for administrators
-    if active_tab in ['config_parameters', 'add_parameters', 'notification']:
+    if active_tab in ['config_parameters', 'add_parameters', 'notification', 'chat']:
         active_menu = 'system_settings'
     elif active_tab == 'feedback_management':
         active_menu = 'feedback'
@@ -328,6 +329,23 @@ def admin_dashboard(request):
     # Pass action types for the dropdown
     action_types = SystemLog.ACTION_TYPES
 
+    chat_users = []
+
+    # Fetch chat-related data if the active tab is 'chat'
+    if active_tab == 'chat':
+        # Get all users with whom the logged-in user has exchanged messages
+        previous_chats = Chat.objects.filter(Q(sender=request.user) | Q(recipient=request.user))
+        user_ids = set()
+        for chat in previous_chats:
+            user_ids.add(chat.sender.id)
+            user_ids.add(chat.recipient.id)
+
+        # Remove the current user from the list
+        user_ids.discard(request.user.id)
+
+        # Fetch the corresponding user objects
+        chat_users = Account.objects.filter(id__in=user_ids)
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
@@ -339,6 +357,7 @@ def admin_dashboard(request):
         'action_types': action_types,  # Pass action types for the dropdown
         'selected_action_type': action_type,  # Pass the selected action type
         'search_query': search_query,  # Pass the search query
+        'chat_users': chat_users,
     }
 
     
