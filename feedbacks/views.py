@@ -84,6 +84,7 @@ def send_feedback(request):
         if form.is_valid():
             feedback = form.save(commit=False)
             feedback.sender = request.user
+            feedback.attachment = request.FILES.get('attachment')  # Save attachment if provided
 
             # Determine the receiver based on the category
             category = form.cleaned_data['category']
@@ -132,4 +133,4 @@ def reply_feedback(request, feedback_id):
             return redirect(request.META.get('HTTP_REFERER', '/profile/?tab=feedback'))
 
 
-    return redirect('/profile/?tab=reply&id={feedback_id}')
+    return redirect('/profile/?tab=reply&id={feedback.id}')

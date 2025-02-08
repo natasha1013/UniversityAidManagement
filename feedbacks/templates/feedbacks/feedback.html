@@ -112,7 +112,17 @@
                 <tr class="feedback-row {% if item.type == 'Sent' %}sent{% else %}received{% endif %}">
                     <td>{{ item.type }}</td>
                     <td>
-                        <a href="#" onclick="showFeedbackContent('{{ item.feedback.id }}', '{{ item.feedback.title|escapejs }}', '{{ item.feedback.message|escapejs }}')">{{ item.feedback.title }}</a>
+                        <a href="#" 
+                            onclick="showFeedbackContent(
+                                '{{ item.feedback.id }}', 
+                                '{{ item.feedback.title|escapejs }}', 
+                                '{{ item.feedback.message|escapejs }}', 
+                                {% if item.feedback.attachment %}'{{ item.feedback.attachment.url|escapejs }}'{% else %}null{% endif %}
+                            )">
+                            {{ item.feedback.title }}
+                        </a>
+
+
                     </td>
                     <td>
                         {% if item.type == 'Sent' %}
@@ -163,6 +173,7 @@
             <span class="close" onclick="closeModal('feedback-content-modal')">&times;</span>
             <h2>Feedback Content</h2>
             <div id="feedback-content"></div>
+            <div id="feedback-attachment"></div>
         </div>
     </div>
 
@@ -218,17 +229,22 @@
         }
 
         // Show feedback content in a modal
-        function showFeedbackContent(feedbackId, title, message) {
+        function showFeedbackContent(feedbackId, title, message, attachmentUrl) {
             const modal = document.getElementById('feedback-content-modal');
             const contentDiv = document.getElementById('feedback-content');
+            
             if (modal && contentDiv) {
-                contentDiv.innerHTML = `
-                    <h3>${title}</h3>
-                    <p>${message}</p>
-                `;
+                let contentHtml = `<h3>${title}</h3><p>${message}</p>`;
+        
+                // Add attachment preview if available
+                if (attachmentUrl && attachmentUrl !== 'null') {
+                    contentHtml += `<p><strong>Attachment:</strong> <a href="${attachmentUrl}" target="_blank">View File</a></p>`;
+                }
+        
+                contentDiv.innerHTML = contentHtml;
                 openModal('feedback-content-modal');
-
-                // Mark the feedback as read via an AJAX request
+        
+                // Mark feedback as read via AJAX request
                 fetch(`/feedbacks/mark-as-read/${feedbackId}/`, {
                     method: 'POST',
                     headers: {
@@ -251,6 +267,7 @@
                 });
             }
         }
+        
         
         // Helper function to get the CSRF token from cookies
         function getCookie(name) {
