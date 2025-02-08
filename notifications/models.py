@@ -23,6 +23,7 @@ class SystemLog(models.Model):
         ('notification_sent', 'Notification Sent'),
         ('user_registration', 'User Registration'),
         ('user_login', 'User Login'), 
+        ('chat_message', 'Chat Message'),  # New action type for chat messages
         ('other', 'Other'),
     ]
 

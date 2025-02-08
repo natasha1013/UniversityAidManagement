@@ -120,6 +120,20 @@ def send_feedback_notification(sender, instance, created, **kwargs):
                     f"in the category '{instance.get_category_display()}' from {instance.sender.username}."
         )
 
+@receiver(post_save, sender=Chat)
+def send_chat_notification(sender, instance, created, **kwargs):
+    """
+    Sends a notification to the recipient when a new chat message is sent.
+    """
+    if created:
+        # Ensure the recipient is not the sender
+        if instance.sender != instance.recipient:
+            Notification.objects.create(
+                user=instance.recipient,
+                message=f"You have a new message from {instance.sender.username}.",
+                read=False
+            )
+
 ### System Log ###
 @receiver(post_save, sender= Account)
 def log_profile_update(sender, instance, created, **kwargs):
@@ -203,15 +217,21 @@ def log_user_logout(sender, request, user, **kwargs):
     )
 
 @receiver(post_save, sender=Chat)
-def send_chat_notification(sender, instance, created, **kwargs):
+def log_chat_message(sender, instance, created, **kwargs):
     """
-    Sends a notification to the recipient when a new chat message is sent.
+    Logs chat messages when they are created or updated.
     """
     if created:
-        # Ensure the recipient is not the sender
-        if instance.sender != instance.recipient:
-            Notification.objects.create(
-                user=instance.recipient,
-                message=f"You have a new message from {instance.sender.username}.",
-                read=False
-            )
+        # Log when a new chat message is created
+        SystemLog.objects.create(
+            action_type='chat_message',
+            description=f"New chat message sent by {instance.sender.username} to {instance.recipient.username}: {instance.message[:50]}...",
+            user=instance.sender  # Associate the log with the sender
+        )
+    else:
+        # Log when an existing chat message is updated
+        SystemLog.objects.create(
+            action_type='chat_message',
+            description=f"Chat message updated by {instance.sender.username} to {instance.recipient.username}: {instance.message[:50]}...",
+            user=instance.sender  # Associate the log with the sender
+        )
