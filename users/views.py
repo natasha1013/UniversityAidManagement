@@ -78,6 +78,7 @@ NAVBAR_CONTENT = {
     'funder': {
         'manage_profile': [
             {'name': 'Manage Profile', 'tab': 'edit_profile'},
+            {'name': 'Chat', 'tab': 'chat'},
         ],
 
         'fund_programs': [
@@ -252,11 +253,29 @@ def funder_dashboard(request):
     user_role = request.user.role
     navbar_content = NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
 
+    chat_users = []
+
+    # Fetch chat-related data if the active tab is 'chat'
+    if active_tab == 'chat':
+        # Get all users with whom the logged-in user has exchanged messages
+        previous_chats = Chat.objects.filter(Q(sender=request.user) | Q(recipient=request.user))
+        user_ids = set()
+        for chat in previous_chats:
+            user_ids.add(chat.sender.id)
+            user_ids.add(chat.recipient.id)
+
+        # Remove the current user from the list
+        user_ids.discard(request.user.id)
+
+        # Fetch the corresponding user objects
+        chat_users = Account.objects.filter(id__in=user_ids)
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
         'active_menu': active_menu,  # Pass the active menu to the template
         'navbar_content': navbar_content,  # Pass the navbar content
+        'chat_users': chat_users,
     }
 
     return render(request, 'dashboards/funder_dashboard.html', context)

@@ -57,6 +57,9 @@
                 </form>
             </div>
         </section> <!-- Close Profile Details Section -->
+    {% elif active_tab == 'chat' %}
+        {% include "chats/chat.html" %}
+        
     {% endif%}
 
     {% include 'others/profilemodal.html' %}
