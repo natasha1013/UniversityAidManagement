@@ -143,7 +143,10 @@
                 
                 {% elif active_tab == 'notification' %}
                     {% include "notifications/list.html" %}
-
+                
+                {% elif active_tab == 'chat' %}
+                    {% include "chats/chat.html" %}
+                    
                 {% endif %}
                 
             {% endblock dashboard %}

@@ -53,26 +53,38 @@ def send_message(request):
 
 def stream_messages(request, user_id):
     """Streams messages in real-time using SSE"""
-    user = get_object_or_404(Account, id=user_id)
+    current_user = get_object_or_404(Account, id=user_id)
+    recipient_id = request.GET.get('recipient_id')  # Get the recipient's ID from the query parameters
+
+    if not recipient_id:
+        return StreamingHttpResponse(
+            f"data: {json.dumps({'error': 'Recipient ID is required'})}\n\n",
+            content_type='text/event-stream'
+        )
+
+    recipient = get_object_or_404(Account, id=recipient_id)
 
     def event_stream():
         try:
-            # Fetch all chats involving the current user
-            chats = Chat.objects.filter(Q(sender=user) | Q(recipient=user)).order_by('timestamp')
+            # Fetch all chats between the current user and the recipient
+            chats = Chat.objects.filter(
+                (Q(sender=current_user) & Q(recipient=recipient)) |
+                (Q(sender=recipient) & Q(recipient=current_user))
+            ).order_by('timestamp')
 
             # Stream existing messages
             for chat in chats:
                 yield f"data: {json.dumps({'sender': chat.sender.username, 'sender_id': chat.sender.id, 'message': chat.message})}\n\n"
 
             # Add the current user to the clients dictionary
-            if user.id not in clients:
-                clients[user.id] = []
-            clients[user.id].append(request)
+            if user_id not in clients:
+                clients[user_id] = []
+            clients[user_id].append(request)
 
             # Keep the connection open for new messages
             while True:
                 time.sleep(1)
-                if user.id not in clients:
+                if user_id not in clients:
                     break
                 yield ''
 
