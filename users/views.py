@@ -1,3 +1,5 @@
+import csv
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
@@ -303,6 +305,24 @@ def admin_dashboard(request):
             Q(user__username__icontains=search_query)
         )
 
+    if request.GET.get('export') == 'csv':
+        # Create the HttpResponse object with CSV headers
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="system_logs.csv"'
+
+        # Write the CSV data
+        writer = csv.writer(response)
+        writer.writerow(['Action Type', 'Description', 'User', 'Timestamp'])  # Header row
+        for log in system_logs:
+            writer.writerow([
+                log.get_action_type_display(),
+                log.description,
+                log.user.username if log.user else 'N/A',
+                log.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+
+        return response  # Return the CSV file as a downloadable response
+    
     # Pass action types for the dropdown
     action_types = SystemLog.ACTION_TYPES
 
