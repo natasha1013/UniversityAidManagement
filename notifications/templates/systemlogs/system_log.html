@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Log</title>
+    <title>System Log</title>
     <style>
         table {
             width: 100%;
@@ -27,11 +27,14 @@
     </style>
 </head>
 <body>
-    <h1>System Admin Log</h1>
+    <h1>System Log</h1>
 
     <!-- Filters and Search -->
     <div class="filters">
         <form method="get">
+            <!-- Hidden Input for Tab -->
+            <input type="hidden" name="tab" value="{{ request.GET.tab|default:'config_parameters' }}">
+
             <!-- Dropdown for Action Type -->
             <label for="action_type">Filter by Action Type:</label>
             <select name="action_type" id="action_type">
@@ -44,7 +47,12 @@
             </select>
 
             <!-- Search Bar -->
-            <input type="text" name="search" placeholder="Search..." value="{{ search_query }}">
+            <input 
+                type="text" 
+                name="search" 
+                placeholder="Search logs..." 
+                value="{{ search_query }}"
+            >
             <button type="submit">Apply</button>
         </form>
     </div>
@@ -60,7 +68,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for log in logs %}
+            {% for log in systemLog_list %}
                 <tr>
                     <td>{{ log.get_action_type_display }}</td>
                     <td>{{ log.description }}</td>

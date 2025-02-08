@@ -142,6 +142,9 @@
     
     {% elif active_tab == 'notification' %}
         {% include "notifications/list.html" %}
+    
+    {% elif active_tab == 'config_parameters' %}
+        {% include "systemlogs/system_log.html" %}
 
     {% endif %}
 

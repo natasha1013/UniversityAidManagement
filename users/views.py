@@ -11,7 +11,7 @@ from .models import Account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from feedbacks.models import Feedback
-from notifications.models import Notification
+from notifications.models import Notification, SystemLog
 
 
 # Navbar content for each menu item, with role-based customization
@@ -286,6 +286,25 @@ def admin_dashboard(request):
     ]
 
     notifications_list = Notification.objects.filter(user=request.user).order_by('-created_at')
+    
+    # System Log Filtering
+    system_logs = SystemLog.objects.all().order_by('-timestamp')  # Start with all logs
+
+    # Filter by action type
+    action_type = request.GET.get('action_type', None)
+    if action_type:
+        system_logs = system_logs.filter(action_type=action_type)
+
+    # Search by description or username
+    search_query = request.GET.get('search', '').strip()
+    if search_query:
+        system_logs = system_logs.filter(
+            Q(description__icontains=search_query) |
+            Q(user__username__icontains=search_query)
+        )
+
+    # Pass action types for the dropdown
+    action_types = SystemLog.ACTION_TYPES
 
     # Fetch data based on the active tab
     context = {
@@ -294,6 +313,10 @@ def admin_dashboard(request):
         'navbar_content': navbar_content,  # Pass the navbar content
         'feedback_list' : feedback_list,
         'notifications_list': notifications_list,
+        'systemLog_list' : system_logs,
+        'action_types': action_types,  # Pass action types for the dropdown
+        'selected_action_type': action_type,  # Pass the selected action type
+        'search_query': search_query,  # Pass the search query
     }
 
     
