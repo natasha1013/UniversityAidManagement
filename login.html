@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  Login - Lilac Grove University
+{% endblock title %}
+
+{% block statics %}
+  <link rel="stylesheet" href="{%static 'css/Login.css'%}">
+{% endblock statics %}
+
+{% block content %}
+    <div class="container">
+      <div class="image-section">
+        <img src="{% static "img/login.png" %}" alt="Graduation" class="login-image">
+      </div>
+      <div class="login-section">
+        <div class="logo">
+          <img src="{% static "img/logo.png" %}" alt="Lilac Grove University Logo">
+          <h1>LILAC GROVE UNIVERSITY</h1>
+          <p>AID MANAGEMENT</p>
+        </div>
+
+        <form class="login-form" method="POST">
+          {% csrf_token %}
+
+          <h2>Login</h2>
+          <p>Don't have an account? <a href="{% url "signup" %}">Register here</a></p>
+          <label for="username">Username:</label>
+          <input type="text" name="username" placeholder="Username" required>
+          <label for="password">Password:</label>
+          <input type="password" name="password" placeholder="Your password" required>
+
+          <button type="submit">Log in</button> 
+        </form>
+
+        {% if error_message %}
+          <div class="alert">
+            <p>{{ error_message }}</p>
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+{% endblock content %}

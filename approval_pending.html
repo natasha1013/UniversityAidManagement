@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approval Pending</title>
+    <!-- Load the static template tag -->
+    {% load static %}
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="{% static 'css/approval_pending.css' %}">
+</head>
+<body>
+
+    <div class="container">
+        <h2>Your account is pending approval</h2>
+        <p>Thank you for registering! Your account is being reviewed by the administrator. You will be notified once your account is approved.</p>
+        <a href="/" class="btn">Go Back to Home</a>
+    </div>
+
+</body>
+</html>

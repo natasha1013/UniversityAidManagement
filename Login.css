@@ -1,0 +1,134 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f8f8f8;
+}
+
+/* Container to hold the image and login sections */
+.container {
+  display: flex;
+  width: 80%;
+  max-width: 1200px;
+  background: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Left image section */
+.image-section {
+  flex: 1;
+  background-color: #f0f0f0;
+}
+
+/* Login image inside the image section */
+.login-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Right login section */
+.login-section {
+  flex: 1;
+  padding: 2rem;
+  text-align: center;
+  background-color: #ffffff;
+}
+
+/* Logo and university branding */
+.logo img {
+  width: 80px;
+}
+
+.logo h1 {
+  font-size: 1.5rem;
+  color: #785B9C;
+  margin: 0.5rem 0 0;
+}
+
+.logo p {
+  font-size: 1rem;
+  color: #785B9C;
+  margin: 0;
+}
+
+/* Login form styling */
+.login-form h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.login-form p {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.login-form a {
+  color: #785B9C;
+  text-decoration: none;
+}
+
+.login-form a:hover {
+  text-decoration: underline;
+}
+
+/* Label styling */
+.login-form label {
+  display: block;
+  text-align: left;
+  font-size: 1rem;
+  margin-bottom: 5px;
+  color: #333;
+  width: 75%; /* Align label width with input box width */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Input box styles */
+.login-form input {
+  width: 90%; /* Match the width of labels */
+  max-width: 400px; /* Set a maximum width for consistency */
+  padding: 0.8rem;
+  margin-bottom: 15px; /* Consistent spacing */
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  margin-left: auto;
+  margin-right: auto; /* Center align the input box */
+}
+
+/* Button styles */
+.login-form button {
+  width: 90%; /* Same width as input boxes */
+  max-width: 430px; /* Same maximum width */
+  padding: 0.8rem;
+  margin-top: 1rem;
+  background-color: #5a4ba1;
+  color: white;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: auto;
+  margin-right: auto; /* Center align the button */
+}
+
+.login-form button:hover {
+  background-color: #493b89;
+}
+
+/* Error message styling */
+.alert {
+  color: red;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+}
