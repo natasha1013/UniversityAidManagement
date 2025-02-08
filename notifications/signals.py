@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from .models import Notification, SystemLog
 from users.models import Account
 from feedbacks.models import Feedback
+from chats.models import Chat
 
 User = get_user_model()
 
@@ -200,3 +201,17 @@ def log_user_logout(sender, request, user, **kwargs):
         description=f"User {user.username} logged out.",
         user=user
     )
+
+@receiver(post_save, sender=Chat)
+def send_chat_notification(sender, instance, created, **kwargs):
+    """
+    Sends a notification to the recipient when a new chat message is sent.
+    """
+    if created:
+        # Ensure the recipient is not the sender
+        if instance.sender != instance.recipient:
+            Notification.objects.create(
+                user=instance.recipient,
+                message=f"You have a new message from {instance.sender.username}.",
+                read=False
+            )
