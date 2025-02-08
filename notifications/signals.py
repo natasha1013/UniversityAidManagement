@@ -1,7 +1,8 @@
 from django.db.models.signals import pre_save, post_save
+from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
-from .models import Notification
+from .models import Notification, SystemLog
 from users.models import Account
 from feedbacks.models import Feedback
 
@@ -117,3 +118,85 @@ def send_feedback_notification(sender, instance, created, **kwargs):
             message=f"You have received new feedback titled '{instance.title}' "
                     f"in the category '{instance.get_category_display()}' from {instance.sender.username}."
         )
+
+### System Log ###
+@receiver(post_save, sender= Account)
+def log_profile_update(sender, instance, created, **kwargs):
+     if not created:  # Only log updates, not creations
+        SystemLog.objects.create(
+            action_type='profile_update',
+            description=f"Profile updated for user {instance.username}.",
+            user=instance
+        )
+
+@receiver(post_save, sender=Feedback)
+def log_feedback_submission(sender, instance, created, **kwargs):
+    """
+    Logs feedback submissions.
+    """
+    if created:
+        SystemLog.objects.create(
+            action_type='feedback_submission',
+            description=f"Feedback submitted by {instance.sender.username} to {instance.receiver.username}.",
+            user=instance.sender
+        )
+
+@receiver(post_save, sender=User)
+def log_user_registration(sender, instance, created, **kwargs):
+    """
+    Logs user registrations.
+    """
+    if created:
+        SystemLog.objects.create(
+            action_type='user_registration',
+            description=f"New user registered: {instance.username}.",
+            user=instance
+        )
+
+@receiver(post_save, sender=Notification)
+def log_notification_sent(sender, instance, created, **kwargs):
+    """
+    Logs when a notification is sent.
+    """
+    if created:
+        SystemLog.objects.create(
+            action_type='notification_sent',
+            description=f"Notification sent to user {instance.user.username}: {instance.message}",
+            user=instance.user
+        )
+
+@receiver(user_logged_in)
+def log_user_login(sender, request, user, **kwargs):
+    """
+    Logs when a user successfully logs in.
+    """
+    ip_address = request.META.get('REMOTE_ADDR', 'Unknown IP')
+    SystemLog.objects.create(
+        action_type='user_login',
+        description=f"User {user.username} logged in from IP {ip_address}.",
+        user=user
+    )
+
+@receiver(user_login_failed)
+def log_user_login_failed(sender, credentials, request, **kwargs):
+    """
+    Logs when a user fails to log in.
+    """
+    ip_address = request.META.get('REMOTE_ADDR', 'Unknown IP') if request else 'Unknown IP'
+    username = credentials.get('username', 'Unknown User')
+    SystemLog.objects.create(
+        action_type='other',
+        description=f"Failed login attempt for user {username} from IP {ip_address}",
+        user=None  # No user associated with failed login
+    )
+
+@receiver(user_logged_out)
+def log_user_logout(sender, request, user, **kwargs):
+    """
+    Logs when a user successfully logs out.
+    """
+    SystemLog.objects.create(
+        action_type='user_login',
+        description=f"User {user.username} logged out.",
+        user=user
+    )

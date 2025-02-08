@@ -22,6 +22,7 @@ class SystemLog(models.Model):
         ('feedback_submission', 'Feedback Submission'),
         ('notification_sent', 'Notification Sent'),
         ('user_registration', 'User Registration'),
+        ('user_login', 'User Login'), 
         ('other', 'Other'),
     ]
 

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Log</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .filters {
+            margin-bottom: 20px;
+        }
+        .filters select, .filters input {
+            margin-right: 10px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>System Admin Log</h1>
+
+    <!-- Filters and Search -->
+    <div class="filters">
+        <form method="get">
+            <!-- Dropdown for Action Type -->
+            <label for="action_type">Filter by Action Type:</label>
+            <select name="action_type" id="action_type">
+                <option value="">All</option>
+                {% for value, label in action_types %}
+                    <option value="{{ value }}" {% if value == selected_action_type %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <!-- Search Bar -->
+            <input type="text" name="search" placeholder="Search..." value="{{ search_query }}">
+            <button type="submit">Apply</button>
+        </form>
+    </div>
+
+    <!-- Logs Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Action Type</th>
+                <th>Description</th>
+                <th>User</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+                <tr>
+                    <td>{{ log.get_action_type_display }}</td>
+                    <td>{{ log.description }}</td>
+                    <td>{{ log.user.username }}</td>
+                    <td>{{ log.timestamp }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No logs available.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
