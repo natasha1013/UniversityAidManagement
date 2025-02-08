@@ -5,118 +5,132 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        #messages {
-            border: 1px solid #ccc;
-            padding: 10px;
-            height: 300px;
-            overflow-y: scroll;
-            margin-bottom: 10px;
-        }
-        #messageInput {
-            width: 80%;
-            padding: 10px;
-            margin-right: 5px;
-        }
-        button {
-            padding: 10px;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f4f4f4; }
+        button { padding: 8px 15px; border: none; cursor: pointer; background-color: #007bff; color: white; border-radius: 5px; }
+        button:hover { background-color: #0056b3; }
+        /* Modal Styling */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; margin: 10% auto; padding: 20px; width: 50%; border-radius: 10px; position: relative; }
+        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 20px; cursor: pointer; color: red; }
+        #messages { height: 300px; overflow-y: auto; padding: 10px; border: 1px solid #ccc; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <h1>Chat</h1>
-    <div id="messages"></div>
-    <input type="text" id="messageInput" placeholder="Type your message here">
-    <button onclick="sendMessage()">Send</button>
+<h2>Chat Users</h2>
+<input type="text" id="search-user" placeholder="Search users..." oninput="searchUsers()" style="width: 100%; padding: 10px; margin-bottom: 10px;">
+<table>
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="user-list">
+        {% for user in chat_users %}
+        <tr>
+            <td>{{ user.username }}</td>
+            <td><button onclick="openChat({{ user.id }}, '{{ user.username }}')">Chat</button></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div id="search-results"></div>
+<!-- Chat Modal -->
+<div id="chat-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeChat()">&times;</span>
+        <h3 id="chat-title">Chat</h3>
+        <div id="messages"></div>
+        <input type="text" id="message-input" placeholder="Type a message">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+<script>
+    let currentUserId = {{ current_user.id }};
+    let selectedUserId = null;
+    let selectedUsername = null;
+    let eventSource = null;
 
-    <script>
-        const userId = "{{ current_user.id|default:0 }}";
-        const otherUserId = "{{ recipient.id }}";  
+    function openChat(userId, username) {
+        selectedUserId = userId;
+        selectedUsername = username;
+        document.getElementById('chat-title').innerText = `Chat with ${username}`;
+        document.getElementById('messages').innerHTML = '';
+        document.getElementById('chat-modal').style.display = 'block';
 
-        if (!otherUserId) {
-            alert("No officer available to chat with.");
+        if (eventSource) {
+            eventSource.close();
         }
 
-        function sendMessage() {
-            const message = document.getElementById('messageInput').value;
-        
-            if (!message.trim()) {
-                alert("Message cannot be empty.");
-                return;
-            }
-        
-            fetch('/chats/send-message/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    sender: userId.toString(),
-                    recipient: otherUserId.toString(),
-                    message: message
-                })
+        eventSource = new EventSource(`/chats/stream-messages/${selectedUserId}/`);
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const messagesDiv = document.getElementById('messages');
+
+            // Replace sender's name with "You" if the sender is the current user
+            const senderName = data.sender_id == currentUserId ? "You" : data.sender;
+
+            // Append the message to the chat window
+            messagesDiv.innerHTML += `<p><strong>${senderName}:</strong> ${data.message}</p>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        };
+    }
+
+    function closeChat() {
+        document.getElementById('chat-modal').style.display = 'none';
+        if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+        }
+    }
+
+    function sendMessage() {
+        if (!selectedUserId) {
+            alert("Select a user to chat with first.");
+            return;
+        }
+        const messageInput = document.getElementById("message-input");
+        const message = messageInput.value.trim();
+        if (message === "") return;
+
+        fetch("/chats/send-message/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                sender: currentUserId,
+                recipient: selectedUserId,
+                message: message
             })
+        }).then(response => response.json())
+        .then(data => {
+            if (data.status === "Message sent") {
+                // Display the sent message as "You"
+                document.getElementById("messages").innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+                messageInput.value = "";
+            }
+        }).catch(error => console.error("Error sending message:", error));
+    }
+
+    function searchUsers() {
+        const query = document.getElementById('search-user').value;
+        if (query.length < 2) {
+            document.getElementById('search-results').innerHTML = '';
+            return;
+        }
+        fetch(`/chats/search-users/?q=${query}`)
             .then(response => response.json())
             .then(data => {
-                if (data.status === "Message sent") {
-                    document.getElementById('messageInput').value = '';
-        
-                    // **🔹 Instantly Show Sent Message in Chatbox**
-                    const messagesDiv = document.getElementById('messages');
-                    messagesDiv.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
-                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                } else {
-                    console.error("Error:", data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error sending message:', error);
+                let results = "<table><tr><th>Username</th><th>Action</th></tr>";
+                data.users.forEach(user => {
+                    results += `<tr><td>${user.username}</td><td><button onclick="openChat(${user.id}, '${user.username}')">Chat</button></td></tr>`;
+                });
+                results += "</table>";
+                document.getElementById('search-results').innerHTML = results;
             });
-        }
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.startsWith(name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        function connectToSSE() {
-            const eventSource = new EventSource(`/chats/stream-messages/${userId}/`);
-
-            eventSource.onmessage = function(event) {
-                const data = JSON.parse(event.data);
-            
-                // ✅ Ignore empty messages (heartbeat pings)
-                if (!data.sender || !data.message) {
-                    return;
-                }
-            
-                const messagesDiv = document.getElementById('messages');
-                messagesDiv.innerHTML += `<p><strong>${data.sender}:</strong> ${data.message}</p>`;
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            };
-
-            eventSource.onerror = function(event) {
-                console.error('SSE connection lost, reconnecting...');
-                eventSource.close();
-                setTimeout(connectToSSE, 3000);
-            };
-        }
-
-        connectToSSE();
-    </script>
+    }
+</script>
 </body>
 </html>
