@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        #messageInput {
+            width: 80%;
+            padding: 10px;
+            margin-right: 5px;
+        }
+        button {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat</h1>
+    <div id="messages"></div>
+    <input type="text" id="messageInput" placeholder="Type your message here">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        const userId = "{{ current_user.id|default:0 }}";
+        const otherUserId = "{{ recipient.id }}";  
+
+        if (!otherUserId) {
+            alert("No officer available to chat with.");
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('messageInput').value;
+        
+            if (!message.trim()) {
+                alert("Message cannot be empty.");
+                return;
+            }
+        
+            fetch('/chats/send-message/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    sender: userId.toString(),
+                    recipient: otherUserId.toString(),
+                    message: message
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "Message sent") {
+                    document.getElementById('messageInput').value = '';
+        
+                    // **🔹 Instantly Show Sent Message in Chatbox**
+                    const messagesDiv = document.getElementById('messages');
+                    messagesDiv.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                } else {
+                    console.error("Error:", data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function connectToSSE() {
+            const eventSource = new EventSource(`/chats/stream-messages/${userId}/`);
+
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+            
+                // ✅ Ignore empty messages (heartbeat pings)
+                if (!data.sender || !data.message) {
+                    return;
+                }
+            
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML += `<p><strong>${data.sender}:</strong> ${data.message}</p>`;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            };
+
+            eventSource.onerror = function(event) {
+                console.error('SSE connection lost, reconnecting...');
+                eventSource.close();
+                setTimeout(connectToSSE, 3000);
+            };
+        }
+
+        connectToSSE();
+    </script>
+</body>
+</html>
