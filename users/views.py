@@ -441,7 +441,6 @@ def reject_user(request, user_id):
 
 @login_required
 def update_user(request, user_id):
-
     user = get_object_or_404(Account, id=user_id)
 
     if request.method == 'POST':
@@ -461,18 +460,20 @@ def update_user(request, user_id):
             user.organization_name = request.POST.get('organization_name')
 
         user.save()
+
         messages.success(request, f'User "{user.username}" has been updated.')
 
-    # return redirect(f"{reverse('dashboard')}?tab=update_user")
-    referer = request.META.get('HTTP_REFERER', None)  # Get the referer URL
+    # Redirect based on the referer or default to the update_user tab
+    referer = request.META.get('HTTP_REFERER', None)
     if referer and 'tab=my_profile' in referer:
-        # Redirect back to the pending users tab
         return redirect(f"{reverse('dashboard')}?tab=my_profile")
-    elif referer and 'tab=update_user' in referer:
-        # Redirect back to the update user tab
-        return redirect(f"{reverse('dashboard')}?tab=update_user")
     elif referer and 'tab=edit_profile' in referer:
         return redirect(f"{reverse('dashboard')}?tab=edit_profile")
+    elif referer and 'tab=manage_profile' in referer:
+        return redirect(f"{reverse('dashboard')}?tab=manage_profile")
+    else:
+        # Default fallback: redirect to the update_user tab
+        return redirect(f"{reverse('dashboard')}?tab=update_user")
     
 @login_required
 def config_parameters(request):
