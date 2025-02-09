@@ -6,19 +6,26 @@
 {% endblock dashboard_title %}
 
 {% block menu %}
-    <a href="{% url 'dashboard' %}?tab=edit_profile" class="menu-item {% if active_menu == 'manage_profile' %}active{% endif %}">
-        Manage Profile
+    
+    <a href="{% url 'dashboard' %}?tab=aid_application" class="menu-item {% if active_menu == 'fund_disbursements' %}active{% endif %}">
+        Fund Evaluations
     </a>
+
     <a href="{% url 'dashboard' %}?tab=status" class="menu-item {% if active_menu == 'fund_programs' %}active{% endif %}">
         Fund Programs
     </a>
-    <a href="{% url 'dashboard' %}?tab=aid_application" class="menu-item {% if active_menu == 'fund_disbursements' %}active{% endif %}">
-        Fund Disbursements
+    
+    <a href="{% url 'dashboard' %}?tab=notification" class="menu-item {% if active_menu == 'communication' %}active{% endif %}">
+        Communication &amp; <br> Feedbacks
+    </a>
+    
+    <a href="{% url 'dashboard' %}?tab=my_profile" class="menu-item {% if active_menu == 'profile' %}active{% endif %}">
+        My Profile
     </a>
 {% endblock menu %}
 
 {% block dashboard %}
-    {% if active_tab == 'edit_profile'%}
+    {% if active_tab == 'my_profile'%}
         <!-- Profile Details -->
         <section class="profile-details">
             <div class="profile-header">
@@ -49,7 +56,7 @@
                         <input type="tel" name="phone_number" placeholder="{{user.phone_number}}" readonly>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group full-width">
                         <label for="organization_name">Organization</label>
                         <input type="text" name="organization_name" placeholder="{{user.organization_name}}" readonly>
                     </div>
@@ -57,6 +64,44 @@
                 </form>
             </div>
         </section> <!-- Close Profile Details Section -->
+
+        {% include 'others/profilemodal.html' %}
+
+        <!-- Delete Account Section -->
+        <div class="delete-account-section">
+            <h3>Delete Account</h3>
+            <p>To confirm your identity, please verify your password:</p>
+            <form method="POST" action="{% url 'delete_account' %}">
+                {% csrf_token %}
+                
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    required
+                    class="delete-account-input"
+                />
+
+                <!-- Display form errors (if any) -->
+                {% if form.errors %}
+                    <div class="error-message">
+                        {% for error in form.password.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <button type="submit" class="delete-button" >Continue</button>
+            </form>
+        </div> <!-- Close Delete Account Section -->
+
+    {% elif active_tab == 'feedback' %}
+        {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}
+    
+    {% elif active_tab == 'notification' %}
+        {% include "notifications/list.html" %}
+    
+
     {% elif active_tab == 'chat' %}
         {% include "chats/chat.html" %}
         

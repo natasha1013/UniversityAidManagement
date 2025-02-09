@@ -64,29 +64,32 @@ NAVBAR_CONTENT = {
     },
     'officer': {
         'communication': [
+            {'name': 'Notification', 'tab': 'notification'},
             {'name': 'Chat', 'tab': 'chat'},
             {'name': 'Feedback', 'tab': 'feedback'},
-            {'name': 'Notification', 'tab': 'notification'},
         ],
 
-        'fund_utilizations': [
-            {'name': 'Fund Utilization', 'tab': 'fund_utilization'},
-        ],
-
-        'aid_applications': [
-            {'name': 'Aid Applications', 'tab': 'aid_application'},
+        'funds': [
             {'name': 'Aid Requests', 'tab': 'aid_request'},
+            {'name': 'Fund Utilization', 'tab': 'fund_utilization'},
+            {'name': 'Aid Applications', 'tab': 'aid_application'},
+            {'name': 'Impact Report', 'tab': 'impact_report'},
         ],
 
-        'report': [
-            {'name': 'Impact Report', 'tab': 'impact_report'},
+        'profile': [
+            {'name': 'My Profile', 'tab': 'my_profile'},
         ],
 
     },
     'funder': {
-        'manage_profile': [
-            {'name': 'Manage Profile', 'tab': 'edit_profile'},
+        'profile': [
+            {'name': 'Edit Profile', 'tab': 'my_profile'},
+        ],
+
+        'communication': [
+            {'name': 'Notification', 'tab': 'notification'},
             {'name': 'Chat', 'tab': 'chat'},
+            {'name': 'Feedback', 'tab': 'feedback'},
         ],
 
         'fund_programs': [
@@ -248,18 +251,33 @@ def dashboard(request):
 @role_required('funder')
 @login_required
 def funder_dashboard(request):
-    active_tab = request.GET.get('tab', 'edit_profile')
+    active_tab = request.GET.get('tab', 'aid_application')
 
     # Determine the active menu based on the tab or other logic
-    active_menu = 'manage_profile'  # Default menu for administrators
+    active_menu = 'fund_disbursements'  # Default menu for administrators
     if active_tab in ['status', 'fund_proposal']:
         active_menu = 'fund_programs'
     elif active_tab in ['aid_application', 'fund_utilization', 'impact_report']:
         active_menu = 'fund_disbursements'
+    elif active_tab in ['chat', 'notification', 'feedback']:
+        active_menu = 'communication'
+    elif active_tab == 'my_profile':
+        active_menu = 'profile'
 
     # Fetch role-specific navbar content
     user_role = request.user.role
     navbar_content = NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
+
+    feedback_entries = Feedback.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user)
+    ).order_by('-created_at')
+
+    feedback_list = [
+        {'feedback': feedback, 'type': 'Sent' if feedback.sender == request.user else 'Received'}
+        for feedback in feedback_entries
+    ]
+
+    notifications_list = Notification.objects.filter(user=request.user).order_by('-created_at')
 
     chat_users = []
 
@@ -283,6 +301,8 @@ def funder_dashboard(request):
         'active_tab': active_tab,
         'active_menu': active_menu,  # Pass the active menu to the template
         'navbar_content': navbar_content,  # Pass the navbar content
+        'feedback_list' : feedback_list,
+        'notifications_list': notifications_list,
         'chat_users': chat_users,
     }
 
@@ -515,12 +535,12 @@ def officer_dashboard(request):
     active_menu = 'communication'
     if active_tab in ['chat', 'feedback', 'notification']:
         active_menu = 'communication'
-    elif active_tab in ['fund_utilization']:
-        active_menu = 'fund_utilizations'
-    elif active_tab in ['aid_application', 'aid_request']:
-        active_menu = 'aid_applications'
-    elif active_tab in ['impact_report']:
-        active_menu = 'report'
+
+    elif active_tab in ['fund_utilization', 'aid_application', 'aid_request', 'impact_report' ]:
+        active_menu = 'funds'
+
+    elif active_tab == 'my_profile':
+        active_menu = 'profile'
 
     # Fetch role-specific navbar content
     user_role = request.user.role

@@ -9,19 +9,90 @@
     <a href="{% url 'dashboard' %}?tab=chat" class="menu-item {% if active_menu == 'communication' %}active{% endif %}">
         Communication
     </a>
-    <a href="{% url 'dashboard' %}?tab=fund_utilization" class="menu-item {% if active_menu == 'fund_utilizations' %}active{% endif %}">
-        Fund Utilization
+    <a href="{% url 'dashboard' %}?tab=aid_request" class="menu-item {% if active_menu == 'funds' %}active{% endif %}">
+        Aid &amp; Funds
     </a>
-    <a href="{% url 'dashboard' %}?tab=aid_application" class="menu-item {% if active_menu == 'aid_applications' %}active{% endif %}">
-        Aid Application
+    <a href="{% url 'dashboard' %}?tab=my_profile" class="menu-item {% if active_menu == 'profile' %}active{% endif %}">
+        My Profile
     </a>
-    <a href="{% url 'dashboard' %}?tab=impact_report" class="menu-item {% if active_menu == 'report' %}active{% endif %}">
-        Report
-    </a>
+
 {% endblock menu %}
 
 {% block dashboard %}
-    {% if active_tab == 'feedback'%}
+    {% if active_tab == 'my_profile' %}
+        <!-- Profile Details -->
+        <section class="profile-details">
+            <div class="profile-header">
+                <h2>Profile Details</h2>
+                <!--<button class="action-button">Edit</button>-->
+                <button class="action-button edit-btn" data-user-id="{{ request.user.id }}" data-bs-toggle="modal" data-bs-target="#editUserModal">Edit</button>
+            </div>
+            <div class="details">
+                <form>
+                    <div class="form-group full-width">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="{{user.username}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="fullname">First Name</label>
+                        <input type="text" id="fullname" placeholder="{{user.first_name}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentid">Last Name</label>
+                        <input type="text" id="lastname" placeholder="{{user.last_name}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="{{user.email}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone_number">Contact Number</label>
+                        <input type="tel" name="phone_number" placeholder="{{user.phone_number}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="years_of_study">Years of Study</label>
+                        <input type="text" id="years_of_study" placeholder="{{user.years_of_study}}" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="years_of_study">Study Program</label>
+                        <input type="text" id="study_program" placeholder="{{user.study_program}}" readonly>
+                    </div>
+                </form>
+            </div>
+        </section> <!-- Close Profile Details Section -->
+
+        {% include 'others/profilemodal.html' %}
+
+        <!-- Delete Account Section -->
+        <div class="delete-account-section">
+            <h3>Delete Account</h3>
+            <p>To confirm your identity, please verify your password:</p>
+            <form method="POST" action="{% url 'delete_account' %}">
+                {% csrf_token %}
+                
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    required
+                    class="delete-account-input"
+                />
+
+                <!-- Display form errors (if any) -->
+                {% if form.errors %}
+                    <div class="error-message">
+                        {% for error in form.password.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <button type="submit" class="delete-button" >Continue</button>
+            </form>
+        </div> <!-- Close Delete Account Section -->
+
+    {% elif active_tab == 'feedback'%}
         {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}
     {% elif active_tab == 'notification'%}
         {% include "notifications/list.html" %}
