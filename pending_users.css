@@ -1,0 +1,100 @@
+/* General Body Styling */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Heading Styling */
+h1 {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Header Row Styling */
+th, td {
+    padding: 15px 20px;
+    text-align: left;
+}
+
+th {
+    background-color: #D1CDE5;
+    color: #333;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+/* Alternate Row Colors */
+tbody tr:nth-child(odd) {
+    background-color: #FFFFFF; /* white for odd rows */
+}
+
+tbody tr:nth-child(even) {
+    background-color: #F7F6FE; /* Light purple for even rows */
+}
+
+/* Row Hover Effect */
+tbody tr:hover {
+    background-color: #e9f5ff; /* Hover color for all rows */
+}
+
+/* Button Styling */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 15px; /* Adjust roundness */
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Approve Button */
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+/* Reject Button */
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    th, td {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+}

@@ -1,0 +1,153 @@
+{% extends "dashboards/dashboard.html" %}
+{% load static %}
+
+{% block dashboard_title %}
+    Admin Dashboard
+{% endblock dashboard_title %}
+
+{% block menu %}
+    <a href="{% url 'dashboard' %}?tab=pending_users" class="menu-item {% if active_menu == 'user_management' %}active{% endif %}">
+        User Management
+    </a>
+    <a href="{% url 'dashboard' %}?tab=config_parameters" class="menu-item {% if active_menu == 'system_settings' %}active{% endif %}">
+        System Settings
+    </a>
+    <a href="{% url 'dashboard' %}?tab=feedback_management" class="menu-item {% if active_menu == 'feedback' %}active{% endif %}">
+        Feedback
+    </a>
+    <a href="{% url 'dashboard' %}?tab=approve_requests" class="menu-item {% if active_menu == 'fund_proposal' %}active{% endif %}">
+        Fund Proposal
+    </a>
+{% endblock menu %}
+
+{% block dashboard %}
+    {% if active_tab == 'pending_users' %}
+    <link rel="stylesheet" href="{% static 'css/pending_users.css' %}">
+        <h2>Approve Users</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th colspan='2'>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for user in pending_users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <form action="{% url 'approve_user' user.id %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success">Approve</button>
+                        </form>
+                    </td>
+
+                    <td>
+                        <form action="{% url 'reject_user' user.id %}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to reject this user?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No pending users to approve.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    {% elif active_tab == 'update_user' %}
+    <link rel="stylesheet" href="{% static 'css/update_user.css' %}">
+        <h2>Update User</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th id="usernameHeader" class="sortable">Username</th>
+                    <th>Email</th>
+                    <th colspan='2'>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <button class="btn btn-primary edit-btn" data-user-id="{{ user.id }}" data-bs-toggle="modal" data-bs-target="#editUserModal">
+                            Edit
+                        </button>
+
+                    </td>
+
+                    <td>
+                        <form action="{% url 'reject_user' user.id %}" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">There are no registered user</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    {% elif active_tab == 'manage_profile' %}
+        <!-- Profile Details -->
+        <section class="profile-details">
+            <div class="profile-header">
+                <h2>Profile Details</h2>
+                <!--<button class="action-button">Edit</button>-->
+                <button class="action-button edit-btn" data-user-id="{{ request.user.id }}" data-bs-toggle="modal" data-bs-target="#editUserModal">Edit</button>
+            </div>
+            <div class="details">
+                <form>
+                    <div class="form-group full-width">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="{{user.username}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="fullname">First Name</label>
+                        <input type="text" id="fullname" placeholder="{{user.first_name}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentid">Last Name</label>
+                        <input type="text" id="lastname" placeholder="{{user.last_name}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="{{user.email}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone_number">Contact Number</label>
+                        <input type="tel" name="phone_number" placeholder="{{user.phone_number}}" readonly>
+                    </div>
+                </form>
+            </div>
+        </section> <!-- Close Profile Details Section -->
+
+    {% elif active_tab == 'feedback_management' %}
+
+        {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}
+    
+    {% elif active_tab == 'notification' %}
+        {% include "notifications/list.html" %}
+    
+    {% elif active_tab == 'config_parameters' %}
+        {% include "systemlogs/system_log.html" %}
+
+    {% endif %}
+
+    {% include 'others/profilemodal.html' %}
+{% endblock dashboard %}

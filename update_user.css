@@ -1,0 +1,102 @@
+/* General Styles for Update User Section */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff; /* White background for table */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    border-radius: 10px; /* Rounded corners */
+    overflow: hidden; /* Ensure no content spills out */
+}
+
+/* Header Row Styling */
+th, td {
+    padding: 15px 20px;
+    text-align: left;
+}
+
+th {
+    background-color: #D1CDE5; /* Light purple for headers */
+    color: #333; /* Dark text color */
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+/* Alternate Row Colors */
+tbody tr:nth-child(odd) {
+    background-color: #FFFFFF; /* white for odd rows */
+}
+
+tbody tr:nth-child(even) {
+    background-color: #F7F6FE; /* Light purple for even rows */
+}
+
+/* Row Hover Effect */
+tbody tr:hover {
+    background-color: #e9f5ff; /* Light blue on hover */
+}
+
+/* Buttons */
+.btn {
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 15px; /* Rounded corners */
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Primary Button */
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    border-radius: 15px !important; /* Ensure border-radius for .btn-primary */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Danger Button (Delete) */
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border-radius: 15px; /* Rounded corners */
+}
+
+.btn-danger:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
+/* Edit Button */
+.edit-btn {
+    background-color: #ffc107;
+    color: white;
+    border-radius: 15px; /* Rounded corners */
+}
+
+.edit-btn:hover {
+    background-color: #e0a800; /* Darker yellow on hover */
+}
+
+/* Empty Row */
+tbody tr td[colspan="5"] {
+    text-align: center;
+    color: #bbb; /* Lighter text color for empty state */
+    font-style: italic;
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+    table {
+        font-size: 14px;
+    }
+
+    .btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
