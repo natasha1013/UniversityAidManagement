@@ -1,0 +1,44 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback</title>
+    <link rel="stylesheet" href="{% static 'css/fbStudent.css' %}">
+</head>
+<body>
+        <div class="form-container">
+            <h1>Feedback Form</h1>
+            <form method="post" action="/feedback/submit" enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="feedback-type">Feedback Type</label>
+                        <select id="feedback-type" name="feedback_type" required>
+                            <option value="">Select type</option>
+                            <option value="system">System/Application</option>
+                            <option value="program">Aid Program</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description"  required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="attachment">Attachment</label>
+                    <input type="file" id="attachment" name="attachment">
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
