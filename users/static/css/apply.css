@@ -1,0 +1,103 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f4f4f8;
+}
+
+.scholarship-container {
+  display: flex;
+  max-width: 1000px;
+  background-color: #d1cde5; /* Adjusted to match the image background */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.image-section {
+  flex: 1;
+}
+
+.image-section img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.details-section {
+  flex: 1;
+  padding: 20px;
+  background-color: #eae8f2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centers content vertically */
+  align-items: center;
+}
+
+.header {
+  display: flex;
+  align-items: center; /* Align logo and header text vertically */
+  gap: 5px; /* Add space between the logo and header text */
+  margin-bottom: 80px;
+  justify-content: center;
+}
+
+.header .logo {
+  width: 110px; /* Adjusted size of the logo */
+  height: auto;
+  flex-shrink: 0; /* Prevent logo from shrinking */
+}
+
+.header-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1.4;
+  margin: 0;
+  color: #6a5acd;
+  text-align: center; 
+}
+
+.requirements {
+  text-align: left; /* Aligns text and button to the left */
+  margin: 0 auto; /* Centers the requirements section horizontally */
+  width: fit-content; /* Makes the container size adapt to the content */
+}
+
+.requirements h2 {
+  font-size: 1.25rem;
+  color: #6a5acd;
+  margin-bottom: 25px;
+}
+
+.requirements ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  color: #333333;
+  font-size: 1rem;
+}
+
+.requirements li {
+  margin-bottom: 10px;
+}
+
+.apply-button {
+  display: block; /* Makes the button a block element */
+  margin-top: 20px; /* Adds space above the button */
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  background-color: #6a5acd;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.apply-button:hover {
+  background-color: #5848b1;
+}
