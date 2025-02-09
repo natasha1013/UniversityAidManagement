@@ -22,8 +22,15 @@
             </div>
             <nav class="menu">
                 {% block menu %}
-                <a href="{% url 'dashboard' %}?tab=financial_aid" class="menu-item {% if active_menu == 'homepage' %}active{% endif %}">
-                    Homepage
+                <a href="{% url 'dashboard' %}?tab=financial_aid" class="menu-item {% if active_menu == 'AidPrograms' %}active{% endif %}">
+                    Aid Programs
+                </a>
+                <a href="{% url 'dashboard' %}?tab=fund_utilization" class="menu-item {% if active_menu == 'funds' %}active{% endif %}">
+                    Funds
+                </a>
+                <a href="{% url 'dashboard' %}?tab=notification" class="menu-item {% if active_menu == 'communication' %}active{% endif %}">
+                    Communication &amp;<br>
+                    Feedback
                 </a>
                 <a href="{% url 'dashboard' %}?tab=my_profile" class="menu-item {% if active_menu == 'profile' %}active{% endif %}">
                     Profile
@@ -93,6 +100,35 @@
 
                     {% include 'others/profilemodal.html' %}
 
+                    <!-- Delete Account Section -->
+                    <div class="delete-account-section">
+                        <h3>Delete Account</h3>
+                        <p>To confirm your identity, please verify your password:</p>
+                        <form method="POST" action="{% url 'delete_account' %}">
+                            {% csrf_token %}
+                            
+                            <input
+                                type="password"
+                                name="password"
+                                placeholder="Password"
+                                required
+                                class="delete-account-input"
+                            />
+
+                            <!-- Display form errors (if any) -->
+                            {% if form.errors %}
+                                <div class="error-message">
+                                    {% for error in form.password.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <button type="submit" class="delete-button" >Continue</button>
+                        </form>
+                    </div> <!-- Close Delete Account Section -->
+                    
+                {% elif active_tab == 'impact_report' %}
                     <!-- Impact Report Section -->
                     <section class="impact-report">
                         <div class="report-header">
@@ -122,34 +158,6 @@
                             </tbody>
                         </table>
                     </section> <!-- Close Impact Report Section -->
-
-                    <!-- Delete Account Section -->
-                    <div class="delete-account-section">
-                        <h3>Delete Account</h3>
-                        <p>To confirm your identity, please verify your password:</p>
-                        <form method="POST" action="{% url 'delete_account' %}">
-                            {% csrf_token %}
-                            
-                            <input
-                                type="password"
-                                name="password"
-                                placeholder="Password"
-                                required
-                                class="delete-account-input"
-                            />
-
-                            <!-- Display form errors (if any) -->
-                            {% if form.errors %}
-                                <div class="error-message">
-                                    {% for error in form.password.errors %}
-                                        <p>{{ error }}</p>
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-
-                            <button type="submit" class="delete-button" >Continue</button>
-                        </form>
-                    </div> <!-- Close Delete Account Section -->
 
                 {% elif active_tab == 'feedback' %}
                     {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}

@@ -42,17 +42,24 @@ NAVBAR_CONTENT = {
         ],
     },
     'student': {
-        'homepage': [
+        'AidPrograms': [
             {'name': 'Financial Aid', 'tab': 'financial_aid'},
+            {'name': 'Application Status', 'tab': 'application_status'},
+        ],
+
+        'communication': [
             {'name': 'Notification', 'tab': 'notification'},
             {'name': 'Chat', 'tab': 'chat'},
+            {'name': 'Feedback', 'tab': 'feedback'},
+        ],
+
+        'funds': [
+            {'name': 'Fund Utilization', 'tab': 'fund_utilization'},
+            {'name': 'Impact Report', 'tab': 'impact_report'},
         ],
 
         'profile': [
             {'name': 'My Profile', 'tab': 'my_profile'},
-            {'name': 'Application Status', 'tab': 'application_status'},
-            {'name': 'Fund Utilization', 'tab': 'fund_utilization'},
-            {'name': 'Feedback', 'tab': 'feedback'},
         ],
     },
     'officer': {
@@ -565,10 +572,14 @@ def student_dashboard(request):
     active_tab = request.GET.get('tab', 'financial_aid')
 
     # Determine the active menu based on the tab or other logic
-    active_menu = 'homepage'
-    if active_tab in ['financial_aid', 'notification', 'chat']:
-        active_menu = 'homepage'
-    elif active_tab in ['my_profile', 'application_status', 'fund_utilization', 'feedback']:
+    active_menu = 'AidPrograms'
+    if active_tab in ['notification', 'chat', 'feedback']:
+        active_menu = 'communication'
+    elif active_tab in ['application_status', 'financial_aid']:
+        active_menu = 'AidPrograms'
+    elif active_tab in ['fund_utilization','impact_report']:
+        active_menu = 'funds'
+    elif active_tab == 'my_profile':
         active_menu = 'profile'
 
     # Fetch role-specific navbar content
