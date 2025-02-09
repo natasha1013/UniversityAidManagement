@@ -1,18 +1,22 @@
-/* static/css/feedbacks.css */
-body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
+    /* Global Resets */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+
+/* Headings */
 h1 {
     color: #333;
 }
+
+/* Actions, Filters, and Search Bar */
 .actions, .filters, .search-bar {
     margin-bottom: 20px;
 }
-.filters button {
-    margin-right: 10px;
-    padding: 5px 10px;
-    cursor: pointer;
+.filters select {
+    padding: 5px;
+    margin-left: 10px;
 }
 .search-bar input {
     width: 100%;
@@ -21,25 +25,66 @@ h1 {
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+
+/* Table Styling */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
 }
 table th, table td {
-    padding: 10px;
-    border: 1px solid #ddd;
+    padding: 15px;
     text-align: left;
 }
 table th {
-    background-color: #f4f4f4;
+    background-color: #f5f4fa;
+    font-size: 14px;
 }
 table tr:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: #fafafa;
 }
-.hidden {
-    display: none;
+table tr:hover {
+    background-color: #f0eefb;
 }
+table td {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Action Buttons */
+.action-btn {
+    background-color: #8cc0de;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.action-btn:hover {
+    background-color: #75b1d4;
+}
+
+/* Status Styling */
+.status {
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    color: white;
+    text-align: center;
+}
+.status.pending {
+    background-color: #ffa000;
+}
+.status.reviewed {
+    background-color: #66bb6a;
+}
+
+/* Modal Styling */
 .modal {
     display: none;
     position: fixed;
@@ -51,11 +96,68 @@ table tr:nth-child(even) {
     background-color: rgba(0, 0, 0, 0.5);
 }
 .modal-content {
-    background-color: white;
+    background-color: #fff;
     margin: 10% auto;
     padding: 20px;
-    border: 1px solid #888;
-    width: 50%;
+    border-radius: 8px;
+    width: 40%;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease-out;
+}
+.modal-content h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.modal-content label {
+    display: block;
+    margin-top: 15px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Input Fields */
+.modal-content input[type="text"],
+.modal-content textarea,
+.modal-content select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    transition: border-color 0.2s ease;
+}
+.modal-content input[type="text"]:focus,
+.modal-content textarea:focus,
+.modal-content select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* File Input */
+.modal-content input[type="file"] {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+/* Buttons */
+.modal-content button[type="submit"] {
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.modal-content button[type="submit"]:hover {
+    background-color: #0056b3;
 }
 .close {
     color: #aaa;
@@ -64,8 +166,35 @@ table tr:nth-child(even) {
     font-weight: bold;
     cursor: pointer;
 }
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
+.close:hover {
+    color: #333;
+}
+
+/* Style the "Send Feedback" button */
+button {
+  background-color: #007BFF; /* Blue background */
+  color: white; /* White text */
+  padding: 12px 15px; /* Comfortable padding */
+  border: none; /* Remove border */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: 15px; /* Consistent font size */
+  transition: background-color 0.3s ease; /* Smooth hover transition */
+  margin-top: 35px;
+}
+
+button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
