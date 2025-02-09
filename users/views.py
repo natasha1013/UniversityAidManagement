@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
+from django.views import View
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
 
@@ -18,7 +19,7 @@ from feedbacks.models import Feedback
 from notifications.models import Notification, SystemLog
 
 
-# Navbar content for each menu item, with role-based customization
+## Navigations
 NAVBAR_CONTENT = {
     'administrator': {
         'account': [
@@ -105,6 +106,7 @@ NAVBAR_CONTENT = {
     },
 }
 
+## settings
 def role_required(role_name):
     def decorator(view_func):
         def wrapper(request, *args, **kwargs):
@@ -141,6 +143,95 @@ def user_detail_api(request, user_id):
     except Account.DoesNotExist:
         return JsonResponse({'error': 'User not found'}, status=404)
 
+## helpers
+def get_navbar_content(user_role, active_menu):
+    return NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
+
+def get_feedback_list(user):
+    feedback_entries = Feedback.objects.filter(
+        Q(sender=user) | Q(receiver=user)
+    ).order_by('-created_at')
+    return [
+        {'feedback': feedback, 'type': 'Sent' if feedback.sender == user else 'Received'}
+        for feedback in feedback_entries
+    ]
+
+def get_notifications_list(user):
+    return Notification.objects.filter(user=user).order_by('-created_at')
+
+def get_chat_users(user):
+    previous_chats = Chat.objects.filter(Q(sender=user) | Q(recipient=user))
+    user_ids = {chat.sender.id for chat in previous_chats} | {chat.recipient.id for chat in previous_chats}
+    user_ids.discard(user.id)
+    return Account.objects.filter(id__in=user_ids)
+
+def get_active_menu(active_tab, role):
+    role_menus = {
+        'administrator': {
+            'pending_users': 'account',
+            'update_user': 'account',
+            'system_log': 'system_settings',
+            'notification': 'communication',
+            'chat': 'communication',
+            'feedback': 'communication',
+            'approve_requests': 'fund_proposal',
+            'edit_program': 'fund_proposal',
+            'my_profile': 'profile',
+        },
+        'student': {
+            'financial_aid': 'AidPrograms',
+            'application_status': 'AidPrograms',
+            'notification': 'communication',
+            'chat': 'communication',
+            'feedback': 'communication',
+            'fund_utilization': 'funds',
+            'impact_report': 'funds',
+            'my_profile': 'profile',
+        },
+        'officer': {
+            'notification': 'communication',
+            'chat': 'communication',
+            'feedback': 'communication',
+            'aid_request': 'funds',
+            'fund_utilization': 'funds',
+            'aid_application': 'funds',
+            'impact_report': 'funds',
+            'my_profile': 'profile',
+        },
+        'funder': {
+            'status': 'fund_programs',
+            'fund_proposal': 'fund_programs',
+            'notification': 'communication',
+            'chat': 'communication',
+            'feedback': 'communication',
+            'aid_application': 'fund_disbursements',
+            'fund_utilization': 'fund_disbursements',
+            'impact_report': 'fund_disbursements',
+            'my_profile': 'profile',
+        },
+    }
+    return role_menus.get(role, {}).get(active_tab, 'default_menu')
+
+def filter_system_logs(queryset, action_type=None, search_query=None):
+    if action_type:
+        queryset = queryset.filter(action_type=action_type)
+    if search_query:
+        queryset = queryset.filter(
+            Q(description__icontains=search_query) |
+            Q(user__username__icontains=search_query)
+        )
+    return queryset.order_by('-timestamp')
+
+def export_to_csv(queryset, filename, headers, row_generator):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    writer = csv.writer(response)
+    writer.writerow(headers)
+    for item in queryset:
+        writer.writerow(row_generator(item))
+    return response
+
+## authentications
 @never_cache
 def signup(request):
 
@@ -227,196 +318,42 @@ def login(request):
     return render(request, 'users/login.html', {'form': form, 'error_message': error_message})
 
 @login_required
-def dashboard(request):
-    # Map roles to their respective dashboard functions
-    role_dashboard_map = {
-        'administrator': admin_dashboard,
-        'student': student_dashboard,
-        'officer': officer_dashboard,
-        'funder': funder_dashboard,
-    }
+def logout_view(request):
+    logout(request)  # This will log out the user
+    return redirect('login')  # Redirect to the login page
 
-    # Get the user's role
-    user_role = request.user.role
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        form = ConfirmPasswordForm(request.POST, user=request.user)
+        if form.is_valid():
+            
+           # Optionally delete related objects if any
+            try:
+                # If you have related models, you can delete them here
+                if hasattr(request.user, 'profile'):
+                    request.user.profile.delete()  # Example: Delete related profile
+                # Add other related object deletions here if needed
 
-    # Check if the role exists in the map
-    if user_role in role_dashboard_map:
-        # Call the appropriate dashboard function
-        return role_dashboard_map[user_role](request)
+                # Delete the user account
+                user = request.user
+                user.delete()
+
+                # Log out the user
+                logout(request)
+
+                # Provide feedback to the user
+                messages.success(request, 'Your account has been successfully deleted.')
+                return redirect('login')
+
+            except Exception as e:
+                messages.error(request, f"Error deleting account: {e}")
+                return redirect('dashboard')
     else:
-        # Handle unknown roles (e.g., redirect to a default page)
-        messages.error(request, "Your role is not recognized. Please contact support.")
-        return redirect('home')  # Redirect to a safe fallback page
+        form = ConfirmPasswordForm(user=request.user)
 
-@role_required('funder')
-@login_required
-def funder_dashboard(request):
-    active_tab = request.GET.get('tab', 'aid_application')
+    return render(request, 'dashboards/dashboard.html', {'form': form})
 
-    # Determine the active menu based on the tab or other logic
-    active_menu = 'fund_disbursements'  # Default menu for administrators
-    if active_tab in ['status', 'fund_proposal']:
-        active_menu = 'fund_programs'
-    elif active_tab in ['aid_application', 'fund_utilization', 'impact_report']:
-        active_menu = 'fund_disbursements'
-    elif active_tab in ['chat', 'notification', 'feedback']:
-        active_menu = 'communication'
-    elif active_tab == 'my_profile':
-        active_menu = 'profile'
-
-    # Fetch role-specific navbar content
-    user_role = request.user.role
-    navbar_content = NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
-
-    feedback_entries = Feedback.objects.filter(
-        Q(sender=request.user) | Q(receiver=request.user)
-    ).order_by('-created_at')
-
-    feedback_list = [
-        {'feedback': feedback, 'type': 'Sent' if feedback.sender == request.user else 'Received'}
-        for feedback in feedback_entries
-    ]
-
-    notifications_list = Notification.objects.filter(user=request.user).order_by('-created_at')
-
-    chat_users = []
-
-    # Fetch chat-related data if the active tab is 'chat'
-    if active_tab == 'chat':
-        # Get all users with whom the logged-in user has exchanged messages
-        previous_chats = Chat.objects.filter(Q(sender=request.user) | Q(recipient=request.user))
-        user_ids = set()
-        for chat in previous_chats:
-            user_ids.add(chat.sender.id)
-            user_ids.add(chat.recipient.id)
-
-        # Remove the current user from the list
-        user_ids.discard(request.user.id)
-
-        # Fetch the corresponding user objects
-        chat_users = Account.objects.filter(id__in=user_ids)
-
-    # Fetch data based on the active tab
-    context = {
-        'active_tab': active_tab,
-        'active_menu': active_menu,  # Pass the active menu to the template
-        'navbar_content': navbar_content,  # Pass the navbar content
-        'feedback_list' : feedback_list,
-        'notifications_list': notifications_list,
-        'chat_users': chat_users,
-    }
-
-    return render(request, 'dashboards/funder_dashboard.html', context)
-
-# admin-only views
-@role_required('administrator')
-@login_required
-def admin_dashboard(request):
-    # Get the 'tab' query parameter (default to 'pending_users')
-    active_tab = request.GET.get('tab', 'system_log')
-
-    # Determine the active menu based on the tab or other logic
-    active_menu ='system_settings'  # Default menu for administrators
-    if active_tab in ['pending_users', 'update_user']:
-        active_menu = 'account'
-    elif active_tab == 'my_profile':
-        active_menu = 'profile'
-    elif active_tab in ['notification', 'chat', 'feedback']:
-        active_menu = 'communication'
-    elif active_tab in ['approve_requests', 'edit_program']:
-        active_menu = 'fund_proposal'
-
-    # Fetch role-specific navbar content
-    user_role = request.user.role
-    navbar_content = NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
-
-    feedback_entries = Feedback.objects.filter(
-        Q(sender=request.user) | Q(receiver=request.user)
-    ).order_by('-created_at')
-
-    feedback_list = [
-        {'feedback': feedback, 'type': 'Sent' if feedback.sender == request.user else 'Received'}
-        for feedback in feedback_entries
-    ]
-
-    notifications_list = Notification.objects.filter(user=request.user).order_by('-created_at')
-    
-    # System Log Filtering
-    system_logs = SystemLog.objects.all().order_by('-timestamp')  # Start with all logs
-
-    # Filter by action type
-    action_type = request.GET.get('action_type', None)
-    if action_type:
-        system_logs = system_logs.filter(action_type=action_type)
-
-    # Search by description or username
-    search_query = request.GET.get('search', '').strip()
-    if search_query:
-        system_logs = system_logs.filter(
-            Q(description__icontains=search_query) |
-            Q(user__username__icontains=search_query)
-        )
-
-    if request.GET.get('export') == 'csv':
-        # Create the HttpResponse object with CSV headers
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="system_logs.csv"'
-
-        # Write the CSV data
-        writer = csv.writer(response)
-        writer.writerow(['Action Type', 'Description', 'User', 'Timestamp'])  # Header row
-        for log in system_logs:
-            writer.writerow([
-                log.get_action_type_display(),
-                log.description,
-                log.user.username if log.user else 'N/A',
-                log.timestamp.strftime('%Y-%m-%d %H:%M:%S')
-            ])
-
-        return response  # Return the CSV file as a downloadable response
-    
-    # Pass action types for the dropdown
-    action_types = SystemLog.ACTION_TYPES
-
-    chat_users = []
-
-    # Fetch chat-related data if the active tab is 'chat'
-    if active_tab == 'chat':
-        # Get all users with whom the logged-in user has exchanged messages
-        previous_chats = Chat.objects.filter(Q(sender=request.user) | Q(recipient=request.user))
-        user_ids = set()
-        for chat in previous_chats:
-            user_ids.add(chat.sender.id)
-            user_ids.add(chat.recipient.id)
-
-        # Remove the current user from the list
-        user_ids.discard(request.user.id)
-
-        # Fetch the corresponding user objects
-        chat_users = Account.objects.filter(id__in=user_ids)
-
-    # Fetch data based on the active tab
-    context = {
-        'active_tab': active_tab,
-        'active_menu': active_menu,  # Pass the active menu to the template
-        'navbar_content': navbar_content,  # Pass the navbar content
-        'feedback_list' : feedback_list,
-        'notifications_list': notifications_list,
-        'systemLog_list' : system_logs,
-        'action_types': action_types,  # Pass action types for the dropdown
-        'selected_action_type': action_type,  # Pass the selected action type
-        'search_query': search_query,  # Pass the search query
-        'chat_users': chat_users,
-    }
-
-    
-
-    if active_tab == 'pending_users':
-        context['pending_users'] = Account.objects.filter(is_approved=False)
-    elif active_tab == 'update_user':
-        context['users'] = Account.objects.all()
-
-    return render(request, 'dashboards/admin_dashboard.html', context)
 
 @login_required
 def pending_users(request):
@@ -499,31 +436,135 @@ def update_user(request, user_id):
     else:
         # Default fallback: redirect to the update_user tab
         return redirect(f"{reverse('dashboard')}?tab=update_user")
+
+## dashboards
+@login_required
+def dashboard(request):
+    # Map roles to their respective dashboard functions
+    role_dashboard_map = {
+        'administrator': admin_dashboard,
+        'student': student_dashboard,
+        'officer': officer_dashboard,
+        'funder': funder_dashboard,
+    }
+
+    # Get the user's role
+    user_role = request.user.role
+
+    # Check if the role exists in the map
+    if user_role in role_dashboard_map:
+        # Call the appropriate dashboard function
+        return role_dashboard_map[user_role](request)
+    else:
+        # Handle unknown roles (e.g., redirect to a default page)
+        messages.error(request, "Your role is not recognized. Please contact support.")
+        return redirect('home')  # Redirect to a safe fallback page
+
+@role_required('funder')
+@login_required
+def funder_dashboard(request):
+    active_tab = request.GET.get('tab', 'aid_application')
+
+    # Determine the active menu based on the tab or other logic
+    active_menu = get_active_menu(active_tab, request.user.role)
+
+    # Fetch role-specific navbar content
+    user_role = request.user.role
+    navbar_content = get_navbar_content(request.user.role, active_menu)
+
+    feedback_list = get_feedback_list(request.user)
+    notifications_list = get_notifications_list(request.user)
+
+    chat_users = []
+
+    # Fetch chat-related data if the active tab is 'chat'
+    if active_tab == 'chat':
+        chat_users = get_chat_users(request.user)
+
+    # Fetch data based on the active tab
+    context = {
+        'active_tab': active_tab,
+        'active_menu': active_menu,  # Pass the active menu to the template
+        'navbar_content': navbar_content,  # Pass the navbar content
+        'feedback_list' : feedback_list,
+        'notifications_list': notifications_list,
+        'chat_users': chat_users,
+    }
+
+    return render(request, 'dashboards/funder_dashboard.html', context)
+
+# admin-only views
+@role_required('administrator')
+@login_required
+def admin_dashboard(request):
+    # Get the 'tab' query parameter (default to 'pending_users')
+    active_tab = request.GET.get('tab', 'system_log')
+
+    # Determine the active menu based on the tab or other logic
+    active_menu = get_active_menu(active_tab, request.user.role)
+
+    # Fetch role-specific navbar content
+    user_role = request.user.role
+    navbar_content = get_navbar_content(request.user.role, active_menu)
+
+    feedback_list = get_feedback_list(request.user)
+    notifications_list = get_notifications_list(request.user)
+
+    # System Log Filtering
+    action_type = request.GET.get('action_type')  # Define action_type explicitly
+    search_query = request.GET.get('search', '').strip()  # Define search_query explicitly
     
-@login_required
-def config_parameters(request):
-    # Example: Fetch configuration parameters
-    return render(request, 'dashboards/admin_dashboard.html', {'section': 'config_parameters'})
+    # System Log Filtering
+    system_logs = filter_system_logs(
+        SystemLog.objects.all(),
+        action_type=request.GET.get('action_type'),
+        search_query=request.GET.get('search', '').strip()
+    )
 
-@login_required
-def add_parameters(request):
-    # Example: Add new parameters
-    return render(request, 'dashboards/admin_dashboard.html', {'section': 'add_parameters'})
+    if request.GET.get('export') == 'csv':
+        return export_to_csv(
+            system_logs,
+            "system_logs.csv",
+            ['Action Type', 'Description', 'User', 'Timestamp'],
+            lambda log: [
+                log.get_action_type_display(),
+                log.description,
+                log.user.username if log.user else 'N/A',
+                log.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            ]
+        )
+    
+    # Pass action types for the dropdown
+    action_types = SystemLog.ACTION_TYPES
 
-@login_required
-def feedback_management(request):
-    # Example: Manage feedback
-    return render(request, 'dashboards/admin_dashboard.html', {'section': 'feedback_management'})
+    chat_users = []
 
-@login_required
-def approve_requests(request):
-    # Example: Approve fund requests
-    return render(request, 'dashboards/admin_dashboard.html', {'section': 'approve_requests'})
+    # Fetch chat-related data if the active tab is 'chat'
+    if active_tab == 'chat':
+        chat_users = get_chat_users(request.user)
 
-@login_required
-def edit_program(request):
-    # Example: Edit program details
-    return render(request, 'dashboards/admin_dashboard.html', {'section': 'edit_program'})
+    # Fetch data based on the active tab
+    context = {
+        'active_tab': active_tab,
+        'active_menu': active_menu,  # Pass the active menu to the template
+        'navbar_content': navbar_content,  # Pass the navbar content
+        'feedback_list' : feedback_list,
+        'notifications_list': notifications_list,
+        'systemLog_list' : system_logs,
+        'action_types': action_types,  # Pass action types for the dropdown
+        'selected_action_type': action_type,  # Pass the selected action type
+        'search_query': search_query,  # Pass the search query
+        'chat_users': chat_users,
+    }
+
+    
+
+    if active_tab == 'pending_users':
+        context['pending_users'] = Account.objects.filter(is_approved=False)
+    elif active_tab == 'update_user':
+        context['users'] = Account.objects.all()
+
+    return render(request, 'dashboards/admin_dashboard.html', context)
 
 # officer-only views
 @role_required('officer')
@@ -532,47 +573,20 @@ def officer_dashboard(request):
     active_tab = request.GET.get('tab', 'chat')
 
     # Determine the active menu based on the tab or other logic
-    active_menu = 'communication'
-    if active_tab in ['chat', 'feedback', 'notification']:
-        active_menu = 'communication'
-
-    elif active_tab in ['fund_utilization', 'aid_application', 'aid_request', 'impact_report' ]:
-        active_menu = 'funds'
-
-    elif active_tab == 'my_profile':
-        active_menu = 'profile'
+    active_menu = get_active_menu(active_tab, request.user.role)
 
     # Fetch role-specific navbar content
     user_role = request.user.role
-    navbar_content = NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
+    navbar_content = get_navbar_content(request.user.role, active_menu)
 
-    feedback_entries = Feedback.objects.filter(
-        Q(sender=request.user) | Q(receiver=request.user)
-    ).order_by('-created_at')
-
-    feedback_list = [
-        {'feedback': feedback, 'type': 'Sent' if feedback.sender == request.user else 'Received'}
-        for feedback in feedback_entries
-    ]
-
-    notifications_list = Notification.objects.filter(user=request.user).order_by('-created_at')
+    feedback_list = get_feedback_list(request.user)
+    notifications_list = get_notifications_list(request.user)
 
     chat_users = []
 
     # Fetch chat-related data if the active tab is 'chat'
     if active_tab == 'chat':
-        # Get all users with whom the logged-in user has exchanged messages
-        previous_chats = Chat.objects.filter(Q(sender=request.user) | Q(recipient=request.user))
-        user_ids = set()
-        for chat in previous_chats:
-            user_ids.add(chat.sender.id)
-            user_ids.add(chat.recipient.id)
-
-        # Remove the current user from the list
-        user_ids.discard(request.user.id)
-
-        # Fetch the corresponding user objects
-        chat_users = Account.objects.filter(id__in=user_ids)
+        chat_users = get_chat_users(request.user)
 
     # Fetch data based on the active tab
     context = {
@@ -592,48 +606,20 @@ def student_dashboard(request):
     active_tab = request.GET.get('tab', 'financial_aid')
 
     # Determine the active menu based on the tab or other logic
-    active_menu = 'AidPrograms'
-    if active_tab in ['notification', 'chat', 'feedback']:
-        active_menu = 'communication'
-    elif active_tab in ['application_status', 'financial_aid']:
-        active_menu = 'AidPrograms'
-    elif active_tab in ['fund_utilization','impact_report']:
-        active_menu = 'funds'
-    elif active_tab == 'my_profile':
-        active_menu = 'profile'
+    active_menu = get_active_menu(active_tab, request.user.role)
 
     # Fetch role-specific navbar content
     user_role = request.user.role
-    navbar_content = NAVBAR_CONTENT.get(user_role, {}).get(active_menu, [])
+    navbar_content = get_navbar_content(request.user.role, active_menu)
 
-    feedback_entries = Feedback.objects.filter(
-        Q(sender=request.user) | Q(receiver=request.user)
-    ).order_by('-created_at')
-
-    feedback_list = [
-        {'feedback': feedback, 'type': 'Sent' if feedback.sender == request.user else 'Received'}
-        for feedback in feedback_entries
-    ]
-
-    notifications_list = Notification.objects.filter(user=request.user).order_by('-created_at')
+    feedback_list = get_feedback_list(request.user)
+    notifications_list = get_notifications_list(request.user)
 
     chat_users = []
 
     # Fetch chat-related data if the active tab is 'chat'
     if active_tab == 'chat':
-        # Get all users with whom the logged-in user has exchanged messages
-        previous_chats = Chat.objects.filter(Q(sender=request.user) | Q(recipient=request.user))
-        user_ids = set()
-        for chat in previous_chats:
-            user_ids.add(chat.sender.id)
-            user_ids.add(chat.recipient.id)
-
-        # Remove the current user from the list
-        user_ids.discard(request.user.id)
-
-        # Fetch the corresponding user objects
-        chat_users = Account.objects.filter(id__in=user_ids)
-
+        chat_users = get_chat_users(request.user)
 
     # Fetch data based on the active tab
     context = {
@@ -652,12 +638,7 @@ def student_dashboard(request):
 
     return render(request, 'dashboards/dashboard.html', context)
 
-# logout 
-@login_required
-def logout_view(request):
-    logout(request)  # This will log out the user
-    return redirect('login')  # Redirect to the login page
-
+## others
 def home(request):
     return redirect('login')
 
@@ -666,35 +647,3 @@ def test(request):
 
 def approval_pending(request):
     return render(request, 'users/approval_pending.html')
-
-@login_required
-def delete_account(request):
-    if request.method == 'POST':
-        form = ConfirmPasswordForm(request.POST, user=request.user)
-        if form.is_valid():
-            
-           # Optionally delete related objects if any
-            try:
-                # If you have related models, you can delete them here
-                if hasattr(request.user, 'profile'):
-                    request.user.profile.delete()  # Example: Delete related profile
-                # Add other related object deletions here if needed
-
-                # Delete the user account
-                user = request.user
-                user.delete()
-
-                # Log out the user
-                logout(request)
-
-                # Provide feedback to the user
-                messages.success(request, 'Your account has been successfully deleted.')
-                return redirect('login')
-
-            except Exception as e:
-                messages.error(request, f"Error deleting account: {e}")
-                return redirect('dashboard')
-    else:
-        form = ConfirmPasswordForm(user=request.user)
-
-    return render(request, 'dashboards/dashboard.html', {'form': form})
