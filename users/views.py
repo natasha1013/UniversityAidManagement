@@ -21,19 +21,20 @@ from notifications.models import Notification, SystemLog
 # Navbar content for each menu item, with role-based customization
 NAVBAR_CONTENT = {
     'administrator': {
-        'user_management': [
+        'account': [
             {'name': 'Approve User', 'tab': 'pending_users'},
             {'name': 'Update User', 'tab': 'update_user'},
-            {'name': 'Manage Profile', 'tab': 'manage_profile'},
+        ],
+        'profile': [
+            {'name': 'Edit Profile', 'tab': 'my_profile'},
         ],
         'system_settings': [
-            {'name': 'Configuration Parameters', 'tab': 'config_parameters'},
-            {'name': 'Add Parameters', 'tab': 'add_parameters'},
+            {'name': 'System Logs', 'tab': 'system_log'},
+        ],
+        'communication': [
             {'name': 'Notification', 'tab': 'notification'},
             {'name': 'Chat', 'tab': 'chat'},
-        ],
-        'feedback': [
-            {'name': 'Feedback Management', 'tab': 'feedback_management'},
+            {'name': 'Feedback', 'tab': 'feedback'},
         ],
         'fund_proposal': [
             {'name': 'Fund Proposal', 'tab': 'approve_requests'},
@@ -285,14 +286,16 @@ def funder_dashboard(request):
 @login_required
 def admin_dashboard(request):
     # Get the 'tab' query parameter (default to 'pending_users')
-    active_tab = request.GET.get('tab', 'pending_users')
+    active_tab = request.GET.get('tab', 'system_log')
 
     # Determine the active menu based on the tab or other logic
-    active_menu = 'user_management'  # Default menu for administrators
-    if active_tab in ['config_parameters', 'add_parameters', 'notification', 'chat']:
-        active_menu = 'system_settings'
-    elif active_tab == 'feedback_management':
-        active_menu = 'feedback'
+    active_menu ='system_settings'  # Default menu for administrators
+    if active_tab in ['pending_users', 'update_user']:
+        active_menu = 'account'
+    elif active_tab == 'my_profile':
+        active_menu = 'profile'
+    elif active_tab in ['notification', 'chat', 'feedback']:
+        active_menu = 'communication'
     elif active_tab in ['approve_requests', 'edit_program']:
         active_menu = 'fund_proposal'
 
@@ -385,12 +388,7 @@ def admin_dashboard(request):
         context['pending_users'] = Account.objects.filter(is_approved=False)
     elif active_tab == 'update_user':
         context['users'] = Account.objects.all()
-    elif active_tab == 'manage_profile':
-        # Not yet implemented
-        pass
-    elif active_tab == 'feedback_management':
-        # context['feedback_list'] = feedback_list  # Fetch all feedback entries
-        pass
+
     return render(request, 'dashboards/admin_dashboard.html', context)
 
 @login_required

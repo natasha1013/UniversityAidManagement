@@ -6,17 +6,22 @@
 {% endblock dashboard_title %}
 
 {% block menu %}
-    <a href="{% url 'dashboard' %}?tab=pending_users" class="menu-item {% if active_menu == 'user_management' %}active{% endif %}">
-        User Management
-    </a>
-    <a href="{% url 'dashboard' %}?tab=config_parameters" class="menu-item {% if active_menu == 'system_settings' %}active{% endif %}">
-        System Settings
-    </a>
-    <a href="{% url 'dashboard' %}?tab=feedback_management" class="menu-item {% if active_menu == 'feedback' %}active{% endif %}">
-        Feedback
+    
+    <a href="{% url 'dashboard' %}?tab=system_log" class="menu-item {% if active_menu == 'system_settings' %}active{% endif %}">
+        System Monitoring
     </a>
     <a href="{% url 'dashboard' %}?tab=approve_requests" class="menu-item {% if active_menu == 'fund_proposal' %}active{% endif %}">
-        Fund Proposal
+        Aid &amp; Fund
+    </a>
+    <a href="{% url 'dashboard' %}?tab=pending_users" class="menu-item {% if active_menu == 'account' %}active{% endif %}">
+        Account
+    </a>
+    <a href="{% url 'dashboard' %}?tab=notification" class="menu-item {% if active_menu == 'communication' %}active{% endif %}">
+        Communication &amp; <br>
+        Notification
+    </a>
+    <a href="{% url 'dashboard' %}?tab=my_profile" class="menu-item {% if active_menu == 'profile' %}active{% endif %}">
+        My Profile
     </a>
 {% endblock menu %}
 
@@ -104,7 +109,7 @@
 
         </table>
 
-    {% elif active_tab == 'manage_profile' %}
+    {% elif active_tab == 'my_profile' %}
         <!-- Profile Details -->
         <section class="profile-details">
             <div class="profile-header">
@@ -138,14 +143,14 @@
             </div>
         </section> <!-- Close Profile Details Section -->
 
-    {% elif active_tab == 'feedback_management' %}
+    {% elif active_tab == 'feedback' %}
 
         {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}
     
     {% elif active_tab == 'notification' %}
         {% include "notifications/list.html" %}
     
-    {% elif active_tab == 'config_parameters' %}
+    {% elif active_tab == 'system_log' %}
         {% include "systemlogs/system_log.html" %}
 
     {% elif active_tab == 'chat' %}
