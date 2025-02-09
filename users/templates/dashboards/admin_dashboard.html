@@ -22,6 +22,7 @@
 
 {% block dashboard %}
     {% if active_tab == 'pending_users' %}
+    <link rel="stylesheet" href="{% static 'css/pending_users.css' %}">
         <h2>Approve Users</h2>
         <table>
             <thead>
@@ -62,6 +63,7 @@
 
         </table>
     {% elif active_tab == 'update_user' %}
+        <link rel="stylesheet" href="{% static 'css/update_user.css' %}">
         <h2>Update User</h2>
         <table>
             <thead>

@@ -241,6 +241,6 @@ def log_account_deletion(sender, instance, **kwargs):
     # Log the account deletion in the system logs
     SystemLog.objects.create(
         action_type='profile_deletion',
-        description=f"User '{instance.username}' deleted their account.",
+        description=f"User '{instance.username}' has been deleted.",
         user=instance
     )
