@@ -1,4 +1,4 @@
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save, post_save, pre_delete
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
@@ -235,3 +235,12 @@ def log_chat_message(sender, instance, created, **kwargs):
             description=f"Chat message updated by {instance.sender.username} to {instance.recipient.username}: {instance.message[:50]}...",
             user=instance.sender  # Associate the log with the sender
         )
+
+@receiver(pre_delete, sender=User)
+def log_account_deletion(sender, instance, **kwargs):
+    # Log the account deletion in the system logs
+    SystemLog.objects.create(
+        action_type='profile_deletion',
+        description=f"User '{instance.username}' deleted their account.",
+        user=instance
+    )

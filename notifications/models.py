@@ -24,6 +24,7 @@ class SystemLog(models.Model):
         ('user_registration', 'User Registration'),
         ('user_login', 'User Login'), 
         ('chat_message', 'Chat Message'),  # New action type for chat messages
+        ('profile_deletion', 'Profile Deleted'),  # New action type for chat messages
         ('other', 'Other'),
     ]
 
