@@ -143,6 +143,34 @@
             </div>
         </section> <!-- Close Profile Details Section -->
 
+        <!-- Delete Account Section -->
+        <div class="delete-account-section">
+            <h3>Delete Account</h3>
+            <p>To confirm your identity, please verify your password:</p>
+            <form method="POST" action="{% url 'delete_account' %}">
+                {% csrf_token %}
+                
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    required
+                    class="delete-account-input"
+                />
+
+                <!-- Display form errors (if any) -->
+                {% if form.errors %}
+                    <div class="error-message">
+                        {% for error in form.password.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <button type="submit" class="delete-button" >Continue</button>
+            </form>
+        </div> <!-- Close Delete Account Section -->
+
     {% elif active_tab == 'feedback' %}
 
         {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}
