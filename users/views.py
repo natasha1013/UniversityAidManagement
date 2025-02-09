@@ -637,3 +637,35 @@ def test(request):
 
 def approval_pending(request):
     return render(request, 'users/approval_pending.html')
+
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        form = ConfirmPasswordForm(request.POST, user=request.user)
+        if form.is_valid():
+            
+           # Optionally delete related objects if any
+            try:
+                # If you have related models, you can delete them here
+                if hasattr(request.user, 'profile'):
+                    request.user.profile.delete()  # Example: Delete related profile
+                # Add other related object deletions here if needed
+
+                # Delete the user account
+                user = request.user
+                user.delete()
+
+                # Log out the user
+                logout(request)
+
+                # Provide feedback to the user
+                messages.success(request, 'Your account has been successfully deleted.')
+                return redirect('login')
+
+            except Exception as e:
+                messages.error(request, f"Error deleting account: {e}")
+                return redirect('dashboard')
+    else:
+        form = ConfirmPasswordForm(user=request.user)
+
+    return render(request, 'dashboards/dashboard.html', {'form': form})

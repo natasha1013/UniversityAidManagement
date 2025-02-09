@@ -14,8 +14,11 @@ urlpatterns = [
     path('profile/update-user/<int:user_id>/', views.update_user, name='update_user'),
     path('api/users/<int:user_id>/', views.user_detail_api, name='user_detail_api'),
 
+    path('profile/delete-account/', views.delete_account, name='delete_account'),
+
     path('logout/', views.logout_view, name='logout'),
     path('', views.home, name='home'),
     path('test/', views.test, name = 'test'),
+    
 
 ]

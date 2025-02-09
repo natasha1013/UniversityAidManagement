@@ -53,3 +53,19 @@ class LoginForm(forms.Form):
                 raise forms.ValidationError("Invalid username or password")
 
         return cleaned_data
+    
+class ConfirmPasswordForm(forms.Form):
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label="Confirm Password"
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if not authenticate(username=self.user.username, password=password):
+            raise forms.ValidationError("Incorrect password. Please try again.")
+        return password
