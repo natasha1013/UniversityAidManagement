@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+    Browse Aid - Lilac Grove University
+{% endblock title %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scholarship Eligibility</title>
+    <link rel="stylesheet" href="{%static 'css/apply.css'%}">
+</head>
+<body>
+    <div class="scholarship-container">
+        <div class="image-section">
+            <img src="{% static "img/graduation.jpeg" %}"  alt="Graduates">
+        </div>
+        <div class="details-section">
+            <div class="header">
+                <img src="{% static "img/logo.png" %}"  alt="Lilac Grove Logo" class="logo">
+                <h1 class="header-text">LILAC GROVE UNIVERSITY<br>PRESIDENT’S SCHOLARSHIP</h1>
+            </div>
+            <div class="requirements">
+                <h2>Eligibility Requirements</h2>
+                <ul>
+                    <li>Malaysian citizens and with good health condition.</li>
+                    <li>Obtained a minimum of 8 A+ for SPM 2025.</li>
+                    <li>Not exceed 21 years old in Dec 2025.</li>
+                    <li>Active in co-curricular activities.</li>
+                    <li>Has received study offer letter.</li>
+                    <li>No bonding with other scholarship/loan.</li>
+                </ul>
+            </div>
+            <button class="apply-button">APPLY</button>
+        </div>
+    </div>
+</body>
+</html>
