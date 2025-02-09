@@ -6,7 +6,7 @@
 {% endblock dashboard_title %}
 
 {% block menu %}
-    <a href="{% url 'dashboard' %}?tab=chat" class="menu-item {% if active_menu == 'communication' %}active{% endif %}">
+    <a href="{% url 'dashboard' %}?tab=notification" class="menu-item {% if active_menu == 'communication' %}active{% endif %}">
         Communication
     </a>
     <a href="{% url 'dashboard' %}?tab=aid_request" class="menu-item {% if active_menu == 'funds' %}active{% endif %}">
@@ -92,12 +92,6 @@
             </form>
         </div> <!-- Close Delete Account Section -->
 
-    {% elif active_tab == 'feedback'%}
-        {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}
-    {% elif active_tab == 'notification'%}
-        {% include "notifications/list.html" %}
-    {% elif active_tab == 'chat'%}
-        {% include "chats/chat.html" %}
     {% endif %}
 
 {% endblock dashboard %}

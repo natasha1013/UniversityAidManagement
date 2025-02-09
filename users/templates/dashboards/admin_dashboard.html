@@ -67,6 +67,7 @@
             </tbody>
 
         </table>
+
     {% elif active_tab == 'update_user' %}
         <link rel="stylesheet" href="{% static 'css/update_user.css' %}">
         <h2>Update User</h2>
@@ -171,18 +172,8 @@
             </form>
         </div> <!-- Close Delete Account Section -->
 
-    {% elif active_tab == 'feedback' %}
-
-        {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}
-    
-    {% elif active_tab == 'notification' %}
-        {% include "notifications/list.html" %}
-    
     {% elif active_tab == 'system_log' %}
         {% include "systemlogs/system_log.html" %}
-
-    {% elif active_tab == 'chat' %}
-        {% include "chats/chat.html" %}
         
     {% endif %}
 

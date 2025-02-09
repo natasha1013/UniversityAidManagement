@@ -570,7 +570,7 @@ def admin_dashboard(request):
 @role_required('officer')
 @login_required
 def officer_dashboard(request):
-    active_tab = request.GET.get('tab', 'chat')
+    active_tab = request.GET.get('tab', 'notification')
 
     # Determine the active menu based on the tab or other logic
     active_menu = get_active_menu(active_tab, request.user.role)

@@ -54,6 +54,17 @@
                 </div>
             </div>
 
+            {% if active_tab == 'feedback' %}
+                    {% include "feedbacks/feedback.html" %}
+                
+            {% elif active_tab == 'notification' %}
+                {% include "notifications/list.html" %}
+        
+            {% elif active_tab == 'chat' %}
+                {% include "chats/chat.html" %}
+
+            {% endif %}
+
             {% block dashboard %} 
                 {% if active_tab == 'my_profile' %}
                     <!-- Profile Details -->
@@ -158,15 +169,6 @@
                             </tbody>
                         </table>
                     </section> <!-- Close Impact Report Section -->
-
-                {% elif active_tab == 'feedback' %}
-                    {% include "feedbacks/feedback.html" with feedback_list=feedback_list %}
-                
-                {% elif active_tab == 'notification' %}
-                    {% include "notifications/list.html" %}
-                
-                {% elif active_tab == 'chat' %}
-                    {% include "chats/chat.html" %}
                     
                 {% endif %}
                 
