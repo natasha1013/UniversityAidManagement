@@ -1,0 +1,83 @@
+{% load static %}
+
+{% block dashboard_title %}
+    Admin Dashboard
+{% endblock dashboard_title %}
+
+
+{% block statics %}
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+{% endblock statics %}
+
+
+
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="{% static "img/logo.png" %}" alt="Lilac Grove Logo">
+                <h1>LILAC GROVE UNIVERSITY AID MANAGEMENT</h1>
+            </div>
+            <nav class="menu">
+                <a href="#" class="menu-item active">Manage User</a>
+                <a href="#" class="menu-item">System Settings</a>
+                <a href="#" class="menu-item">Feedback</a>
+                <a href="#" class="menu-item">Fund Proposal</a>
+            </nav>
+        </div>
+
+        <!-- Content -->
+        <main class="content">
+            <!-- Navbar -->
+            <div class="navbar">
+                <div class="tabs">
+                    {% for item in navbar_content %}
+                    <a href="{% url 'dashboard' %}?tab={{ item.tab }}" class="tab {% if active_tab == item.tab %}active{% endif %}">
+                        {{ item.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+                <div class="logout">
+                    <a href="{% url "logout" %}">Logout</a>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="form-card">
+                    <h2>Add New User</h2>
+                    <form>
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" placeholder="Enter Username" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" placeholder="Enter Password" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" placeholder="Enter Email" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="contact_number">Contact Number</label>
+                            <input type="tel" id="contact_number" name="contact_number" placeholder="Enter Contact Number" />
+                        </div>
+                        <div class="form-group">
+                            <label for="user_role">User Role</label>
+                            <select id="user_role" name="user_role" required>
+                                <option value="Admin">Admin</option>
+                                <option value="User">User</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
