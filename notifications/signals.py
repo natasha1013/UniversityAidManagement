@@ -201,7 +201,7 @@ def notify_on_funding_proposal_status_change(sender, instance, **kwargs):
         
         # Log the status change in the system logs
         SystemLog.objects.create(
-            action_type='funding_proposal_status_change',
+            action_type='application_status',
             description=f"Funding proposal '{instance.name}' status changed from {old_approval_status} to {new_approval_status}.",
             user=instance.proposed_by
         )
@@ -385,3 +385,94 @@ def log_account_deletion(sender, instance, **kwargs):
         description=f"User '{instance.username}' has been deleted.",
         user=instance
     )
+
+@receiver(post_save, sender=AidProgram)
+def log_funding_proposal_submission(sender, instance, created, **kwargs):
+    """
+    Logs when a new funding proposal is submitted.
+    """
+    if created:
+        SystemLog.objects.create(
+            action_type='aid_program',
+            description=f"Funding proposal '{instance.name}' submitted by {instance.proposed_by.username}.",
+            user=instance.proposed_by
+        )
+
+@receiver(pre_save, sender=AidProgram)
+def capture_old_aid_program_values(sender, instance, **kwargs):
+    """
+    Captures old field values before saving an AidProgram instance.
+    """
+    if instance.pk:  # Only capture if instance exists
+        try:
+            old_instance = AidProgram.objects.get(pk=instance.pk)
+            old_values[instance.pk] = {
+                "approval_status": old_instance.approval_status,
+            }
+        except AidProgram.DoesNotExist:
+            pass  # If instance doesn't exist yet, do nothing
+
+@receiver(post_save, sender=AidProgram)
+def log_funding_proposal_status_change(sender, instance, **kwargs):
+    """
+    Logs when the approval status of a funding proposal changes.
+    """
+    if instance.pk not in old_values:
+        return  # Skip logging for new proposals
+    old_data = old_values.pop(instance.pk, {})  # Retrieve old values and remove from storage
+
+    # Check if approval_status has changed
+    old_approval_status = old_data.get("approval_status", None)
+    new_approval_status = instance.approval_status
+    if old_approval_status != new_approval_status:
+        SystemLog.objects.create(
+            action_type='aid_program',
+            description=f"Funding proposal '{instance.name}' status changed from {old_approval_status} to {new_approval_status}.",
+            user=instance.proposed_by
+        )
+
+### System Logs for ApplicationStatus (Student Applications)
+@receiver(post_save, sender=ApplicationStatus)
+def log_application_submission(sender, instance, created, **kwargs):
+    """
+    Logs when a student submits an application for an aid program.
+    """
+    if created:
+        SystemLog.objects.create(
+            action_type='application_status',
+            description=f"New application submitted by {instance.student.username} for {instance.aid_program.name}.",
+            user=instance.student
+        )
+
+@receiver(pre_save, sender=ApplicationStatus)
+def capture_old_application_status_values(sender, instance, **kwargs):
+    """
+    Captures old field values before saving an ApplicationStatus instance.
+    """
+    if instance.pk:  # Only capture if instance exists
+        try:
+            old_instance = ApplicationStatus.objects.get(pk=instance.pk)
+            old_values[instance.pk] = {
+                "status": old_instance.status,
+            }
+        except ApplicationStatus.DoesNotExist:
+            pass  # If instance doesn't exist yet, do nothing
+
+@receiver(post_save, sender=ApplicationStatus)
+def log_application_status_change(sender, instance, **kwargs):
+    """
+    Logs when the status of an application changes.
+    """
+    if instance.pk not in old_values:
+        return  # Skip logging for new applications
+    old_data = old_values.pop(instance.pk, {})  # Retrieve old values and remove from storage
+
+    # Check if status has changed
+    old_status = old_data.get("status", None)
+    new_status = instance.status
+    if old_status != new_status:
+        SystemLog.objects.create(
+            action_type='application_status',
+            description=f"Application status for {instance.student.username} changed from {old_status} to {new_status}.",
+            user=instance.student
+        )

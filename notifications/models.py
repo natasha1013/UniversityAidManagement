@@ -25,10 +25,12 @@ class SystemLog(models.Model):
         ('user_login', 'User Login'), 
         ('chat_message', 'Chat Message'),  # New action type for chat messages
         ('profile_deletion', 'Profile Deleted'),  # New action type for chat messages
+        ('aid_program', 'Aid Program'),  
+        ('application_status', 'Application Status'),  
         ('other', 'Other'),
     ]
 
-    action_type = models.CharField(max_length=20, choices=ACTION_TYPES)
+    action_type = models.CharField(max_length=30, choices=ACTION_TYPES)
     description = models.TextField()
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='admin_logs')
     timestamp = models.DateTimeField(auto_now_add=True)
