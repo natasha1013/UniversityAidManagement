@@ -27,10 +27,10 @@ SECRET_KEY = 'django-insecure-zctcui-$((o=3635o(x(_nqdnz9pvv=l*g(fm6l*zr07wwi%tn
 DEBUG = True
 
 # ngrok for demo
-ALLOWED_HOSTS = ['c622-2001-e68-5434-32b9-40f6-c663-66d6-ea94.ngrok-free.app', '127.0.0.1']
+ALLOWED_HOSTS = ['c3af-2001-e68-5434-32b9-40f6-c663-66d6-ea94.ngrok-free.app', '127.0.0.1']
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://c622-2001-e68-5434-32b9-40f6-c663-66d6-ea94.ngrok-free.app/',
+    'https://c3af-2001-e68-5434-32b9-40f6-c663-66d6-ea94.ngrok-free.app/',
 ]
 
 # Application definition
@@ -55,7 +55,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

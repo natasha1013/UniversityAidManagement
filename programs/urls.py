@@ -1,8 +1,6 @@
 from django.urls import path
 from .views import *
 
-
-
 urlpatterns = [
     path('aid/', aid_list, name='aid_list'),
     path('aid/<int:aid_id>/', aid_details, name='aid_details'),
