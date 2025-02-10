@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Applications</title>
+    
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'users/css/modals.css' %}">
+
+    <style>
+        /* General Table Styling */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+
+        .table thead {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Button Styling */
+        .btn-warning {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .btn-warning:hover {
+            background-color: #e68900;
+        }
+
+        /* Custom Modal Backdrop */
+        .custom-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        /* Custom Modal */
+        .custom-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            display: none;
+        }
+
+        /* Modal Header */
+        .custom-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .custom-modal-header h5 {
+            margin: 0;
+        }
+
+        .custom-close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Modal Body */
+        .custom-modal-body {
+            margin-bottom: 15px;
+        }
+
+        .custom-modal-body label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .custom-modal-body input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        /* Modal Footer */
+        .custom-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background-color: #ccc;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Manage Aid Applications</h2>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Aid Program</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in applications %}
+            <tr>
+                <td>{{ app.student.username }}</td>
+                <td>{{ app.aid_program.name }}</td>
+                <td>{{ app.get_status_display }}</td>
+                <td>
+                    <a href="{% url 'review_application' app.id %}" class="btn btn-warning btn-sm">
+                        Review
+                    </a>
+                    
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center">No applications to review.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Custom Modal -->
+<div class="custom-modal-backdrop" id="customModalBackdrop"></div>
+<div class="custom-modal" id="customModal">
+    <div class="custom-modal-header">
+        <h5>Review Application</h5>
+        <button class="custom-close-btn" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="custom-modal-body">
+        <p><strong>Student:</strong> <span id="modalStudent"></span></p>
+        <p><strong>Aid Program:</strong> <span id="modalAidProgram"></span></p>
+        <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+        <p><strong>Comments:</strong> <span id="modalComments"></span></p>
+    </div>
+    <div class="custom-modal-footer">
+        <button class="btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+</div>
+
+<script>
+    // Sample Data (Replace with real data from your backend)
+    const applications = [
+        { id: 1, student: "admin", aidProgram: "Lilac Grove Merit Scholarship", status: "Additional Info Required", comment: "Missing transcript." },
+        { id: 2, student: "rawr", aidProgram: "Lilac Grove Merit Scholarship", status: "Additional Info Required", comment: "Needs income verification." },
+        { id: 3, student: "rawr", aidProgram: "Lilac Grove Sibling Discount", status: "Approved", comment: "Approved without issue." }
+    ];
+
+    // Function to open modal and set its content
+    function openModal(id) {
+        const app = applications.find(app => app.id === id);
+        if (!app) return;
+
+        document.getElementById("modalStudent").textContent = app.student;
+        document.getElementById("modalAidProgram").textContent = app.aidProgram;
+        document.getElementById("modalStatus").textContent = app.status;
+        document.getElementById("modalComments").textContent = app.comment;
+
+        document.getElementById("customModalBackdrop").style.display = "block";
+        document.getElementById("customModal").style.display = "block";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const modalBackdrop = document.querySelector(".custom-modal-backdrop");
+        const modal = document.querySelector(".custom-modal");
+        const closeModalButtons = document.querySelectorAll(".custom-close-btn, .btn-secondary");
+    
+        function closeModal() {
+            modal.style.display = "none";
+            modalBackdrop.style.display = "none";
+        }
+    
+        closeModalButtons.forEach(button => {
+            button.addEventListener("click", closeModal);
+        });
+    
+        modalBackdrop.addEventListener("click", closeModal);
+    });
+    
+
+    // Function to close modal
+    function closeModal() {
+        document.getElementById("customModalBackdrop").style.display = "none";
+        document.getElementById("customModal").style.display = "none";
+    }
+
+    // Function to generate the table rows
+    function renderApplications() {
+        const tableBody = document.getElementById("applications-table");
+        tableBody.innerHTML = "";
+
+        applications.forEach(app => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${app.student}</td>
+                <td>${app.aidProgram}</td>
+                <td>${app.status}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm" onclick="openModal(${app.id})">
+                        Review
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Render applications on page load
+    window.onload = renderApplications;
+</script>
+
+</body>
+</html>

@@ -18,6 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 from feedbacks.models import Feedback
 from notifications.models import Notification, SystemLog
 from programs.models import AidProgram, ApplicationStatus, AppealStatus
+from programs.forms import AidProgramForm
 
 
 
@@ -492,6 +493,32 @@ def funder_dashboard(request):
         'notifications_list': notifications_list,
         'chat_users': chat_users,
     }
+    
+    if active_tab == 'status':
+        """Funders can view the status of their submitted aid proposals."""
+        my_aids = AidProgram.objects.filter(proposed_by=request.user)
+        context['my_aids'] = my_aids
+
+    
+    if active_tab == 'fund_proposal':
+        """Allow funders to propose a new aid program."""
+    
+        # Initialize form
+        form = AidProgramForm()
+
+        if request.method == "POST":
+            form = AidProgramForm(request.POST)
+            if form.is_valid():
+                aid_program = form.save(commit=False)
+                aid_program.proposed_by = request.user
+                aid_program.approval_status = "PENDING"
+                aid_program.save()
+                messages.success(request, "Aid program proposal submitted successfully! Waiting for admin approval.")
+                return redirect(f'/profile/?tab=status') # Redirect to the dashboard after submission
+        
+        # Add form to the context
+        context['form'] = form 
+    
 
     return render(request, 'dashboards/funder_dashboard.html', context)
 
@@ -564,8 +591,29 @@ def admin_dashboard(request):
         context['pending_users'] = Account.objects.filter(is_approved=False)
     elif active_tab == 'update_user':
         context['users'] = Account.objects.all()
+    elif active_tab == 'approve_requests':
+        """Admin can review and approve/reject proposed aid programs."""
+        pending_aids = AidProgram.objects.filter(approval_status="PENDING")
+        context['pending_aids'] = pending_aids
+        
 
     return render(request, 'dashboards/admin_dashboard.html', context)
+
+def approve_aid(request, aid_id):
+    """Admin approves an aid program."""
+    aid_program = get_object_or_404(AidProgram, id=aid_id)
+    aid_program.approval_status = "APPROVED"
+    aid_program.save()
+    messages.success(request, "Aid program approved successfully.")
+    return redirect('/admin_dashboard/?tab=approve_requests')  # Redirects back to the tab
+
+def reject_aid(request, aid_id):
+    """Admin rejects an aid program."""
+    aid_program = get_object_or_404(AidProgram, id=aid_id)
+    aid_program.approval_status = "REJECTED"
+    aid_program.save()
+    messages.error(request, "Aid program rejected.")
+    return redirect('/admin_dashboard/?tab=approve_requests')  # Redirects back to the tab
 
 # officer-only views
 @role_required('officer')
@@ -665,7 +713,7 @@ def student_dashboard(request):
         
     elif active_tab == 'financial_aid':
         # Fetch financial aid programs
-        aid_list = AidProgram.objects.all()  # Assuming you have an AidProgram model
+        aid_list = AidProgram.objects.filter(approval_status="APPROVED", status="OPEN")  # Assuming you have an AidProgram model
         context['aids'] = aid_list  # Pass the aid list to the template
     
     elif active_tab == 'application_status':

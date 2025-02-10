@@ -3,11 +3,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from .models import AidProgram, ApplicationStatus, AppealStatus
 from .forms import AidProgramForm
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 # Student
 
 def aid_list(request):
-    aids = AidProgram.objects.filter(approval_status="APPROVED")
+    aids = AidProgram.objects.filter(approval_status="APPROVED", status="OPEN")
     return render(request, 'aid_list.html', {'aids': aids})
 
 
@@ -49,6 +51,11 @@ def application_status_view(request):
 
 
 # Aid Officer
+
+def all_aid_list(request):
+    aids = AidProgram.objects.all()
+    return render(request, 'all_aids.html', {'all_aids': aids})
+
 def manage_aid_applications(request):
 
     applications = ApplicationStatus.objects.filter(status="pending")
@@ -68,9 +75,14 @@ def review_application(request, application_id):
         application.save()
         messages.success(request, "Application status updated successfully.")
 
+        return redirect(f'/profile/?tab=aid_application')\
+            
     return render(request, "review_application.html", {"application": application})
 
+
 #Funders
+
+
 def propose_aid_program(request):
     """Allow funders to propose a new aid program."""
     if request.method == "POST":
@@ -81,18 +93,25 @@ def propose_aid_program(request):
             aid_program.approval_status = "PENDING"
             aid_program.save()
             messages.success(request, "Aid program proposal submitted successfully! Waiting for admin approval.")
-            return redirect("proposed_aid_list")
+            return redirect(f'/profile/?tab=status')
+
     else:
         form = AidProgramForm()
     
     return render(request, "propose_aid_program.html", {"form": form})
+
+def my_proposals(request):
+    """Funders can view the status of their submitted aid proposals."""
+    my_aids = AidProgram.objects.filter(proposed_by=request.user)
+    return render(request, "my_proposals.html", {"my_aids": my_aids})
+
 
 
 #admin
 def review_aid_program(request):
     """Admin can review and approve/reject proposed aid programs."""
     pending_aids = AidProgram.objects.filter(approval_status="PENDING")
-
+    
     return render(request, "review_aid_program.html", {"pending_aids": pending_aids})
 
 def approve_aid(request, aid_id):

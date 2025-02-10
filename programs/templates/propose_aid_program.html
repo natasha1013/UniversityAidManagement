@@ -1,9 +1,32 @@
 {% extends "base.html" %}
+
+{% block title %}Propose New Aid Program{% endblock %}
+
 {% block content %}
-<h2>Propose New Aid Program</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit Proposal</button>
-</form>
+<div class="container mt-4">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">Propose New Aid Program</h2>
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                {{ form.as_p }}
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Submit Proposal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .card {
+        max-width: 600px;
+        margin: auto;
+        border-radius: 10px;
+        background: #ffffff;
+    }
+</style>
+
 {% endblock %}
