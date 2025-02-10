@@ -586,6 +586,10 @@ def admin_dashboard(request):
     if active_tab == 'chat':
         chat_users = get_chat_users(request.user)
 
+    pending_aids = AidProgram.objects.filter(approval_status='PENDING').order_by('-closing_date')
+
+    aids_list = get_aids_list()
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
@@ -598,6 +602,8 @@ def admin_dashboard(request):
         'selected_action_type': action_type,  # Pass the selected action type
         'search_query': search_query,  # Pass the search query
         'chat_users': chat_users,
+        'pending_aids': pending_aids,
+        'aids_list': aids_list,  # Add the list of aid programs to the context
     }
 
     

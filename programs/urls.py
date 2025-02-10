@@ -17,7 +17,9 @@ urlpatterns = [
     path("my_proposals/", my_proposals, name="my_proposals"),
    
     path("propose_aid/", propose_aid_program, name="propose_aid"),
+
     path("review_aid_program/", review_aid_program, name="review_aid_program"),
+    
     path("approve_aid/<int:aid_id>/", approve_aid, name="approve_aid"),
     path("reject_aid/<int:aid_id>/", reject_aid, name="reject_aid"),
 ]

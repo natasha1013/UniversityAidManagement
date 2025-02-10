@@ -99,7 +99,7 @@ def approve_aid(request, aid_id):
     aid_program.approval_status = "APPROVED"
     aid_program.save()
     messages.success(request, "Aid program approved successfully.")
-    return redirect("review_aid_program")
+    return redirect(f"{reverse('dashboard')}?tab=approve_requests")
 
 def reject_aid(request, aid_id):
     """Admin rejects an aid program."""
@@ -107,4 +107,4 @@ def reject_aid(request, aid_id):
     aid_program.approval_status = "REJECTED"
     aid_program.save()
     messages.error(request, "Aid program rejected.")
-    return redirect("review_aid_program")
+    return redirect(f"{reverse('dashboard')}?tab=approve_requests")
