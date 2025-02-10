@@ -17,6 +17,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from feedbacks.models import Feedback
 from notifications.models import Notification, SystemLog
+from programs.forms import AidProgramForm  # Import the AidProgramForm
 
 
 ## Navigations
@@ -488,6 +489,21 @@ def dashboard(request):
 def funder_dashboard(request):
     active_tab = request.GET.get('tab', 'aid_application')
 
+    # Handle form submission for proposing a new aid program
+    if request.method == "POST" and active_tab == "fund_proposal":
+        form = AidProgramForm(request.POST)
+        if form.is_valid():
+            aid_program = form.save(commit=False)
+            aid_program.proposed_by = request.user  # Set the logged-in user as the proposer
+            aid_program.save()
+            messages.success(request, "Your aid program proposal has been submitted successfully!")
+            return redirect(f'/profile/?tab=status')  # Redirect back to the dashboard
+        else:
+            # Debugging: Print form errors to the console or log them
+            messages.error(request, "There was an error with your submission. Please check the form.")
+    else:
+        form = AidProgramForm()  # Create an empty form for GET requests
+
     # Determine the active menu based on the tab or other logic
     active_menu = get_active_menu(active_tab, request.user.role)
 
@@ -504,6 +520,8 @@ def funder_dashboard(request):
     if active_tab == 'chat':
         chat_users = get_chat_users(request.user)
 
+    my_aids = AidProgram.objects.filter(proposed_by=request.user).order_by('-closing_date')
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
@@ -512,6 +530,8 @@ def funder_dashboard(request):
         'feedback_list' : feedback_list,
         'notifications_list': notifications_list,
         'chat_users': chat_users,
+        'my_aids': my_aids,  # Add the list of aid programs to the context
+        'form': form,  # Pass the form to the template
     }
 
     return render(request, 'dashboards/funder_dashboard.html', context)

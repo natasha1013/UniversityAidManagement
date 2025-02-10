@@ -1,9 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Review Aid Program Proposals</h2>
-{% for aid in pending_aids %}
-    <p>{{ aid.name }} - Proposed by: {{ aid.proposed_by.username }}</p>
-    <a href="{% url 'approve_aid' aid.id %}">Approve</a> | 
-    <a href="{% url 'reject_aid' aid.id %}">Reject</a>
-{% endfor %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-header bg-dark text-white text-center">
+            <h3 class="mb-0">Review Aid Program Proposals</h3>
+        </div>
+        <div class="card-body">
+            {% if pending_aids %}
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="text-center">No.</th>
+                                <th>Name</th>
+                                <th>Proposed By</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for aid in pending_aids %}
+                            <tr>
+                                <td class="text-center">{{ forloop.counter }}</td>
+                                <td>{{ aid.name }}</td>
+                                <td>{{ aid.proposed_by.username }}</td>
+                                <td class="text-center">
+                                    <a href="{% url 'approve_aid' aid.id %}" class="btn btn-success btn-sm me-2">
+                                        <i class="fas fa-check-circle"></i> Approve
+                                    </a>
+                                    <a href="{% url 'reject_aid' aid.id %}" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-times-circle"></i> Reject
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info text-center fw-bold py-3">
+                    <i class="fas fa-info-circle"></i> No pending aid program proposals.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<!-- FontAwesome for icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 {% endblock %}

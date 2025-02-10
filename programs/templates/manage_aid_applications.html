@@ -1,32 +1,240 @@
-{% extends 'base.html' %}
-{% block title %}Manage Applications{% endblock %}
-{% block content %}
-<h2>Manage Aid Applications</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Student</th>
-            <th>Aid Program</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for app in applications %}
-        <tr>
-            <td>{{ app.student.username }}</td>
-            <td>{{ app.aid_program.name }}</td>
-            <td>{{ app.get_status_display }}</td>
-            <td>
-                <a href="{% url 'review_application' app.id %}" class="btn btn-warning btn-sm">
-                    Review
-                </a>
-                
-            </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="4" class="text-center">No applications to review.</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Applications</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'users/css/modals.css' %}">
+    <style>
+        /* Table Styling */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+        .table thead {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        /* Button Styling */
+        .btn-warning {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+        .btn-warning:hover {
+            background-color: #e68900;
+        }
+        /* Custom Modal */
+        .custom-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        .custom-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            display: none;
+        }
+        /* Modal Header */
+        .custom-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .custom-modal-header h5 {
+            margin: 0;
+        }
+        .custom-close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        /* Form Styling */
+        .form-label {
+            font-weight: bold;
+        }
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background-color: #ccc;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2 class="text-center">Manage Aid Applications</h2>
+    
+    <div class="container mt-4">
+        <table class="table table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Aid Program</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in applications %}
+                <tr>
+                    <td>{{ application.student.username }}</td>
+                    <td>{{ application.student.email }}</td>
+                    <td>{{ application.aid_program.name }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if application.status == 'approved' %} bg-success 
+                            {% elif application.status == 'rejected' %} bg-danger 
+                            {% elif application.status == 'additional_info' %} bg-warning 
+                            {% else %} bg-secondary {% endif %}">
+                            {{ application.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="openModal(
+                            '{{ application.id }}',
+                            '{{ application.student.username }}',
+                            '{{ application.student.email }}',
+                            '{{ application.student.study_program }}',
+                            '{{ application.student.years_of_study }}',
+                            '{{ application.student.gpa }}',
+                            '{{ application.aid_program.name }}',
+                            '{{ application.get_status_display }}',
+                            '{{ application.status }}',
+                            '{{ application.officer_comment|default_if_none:'' }}'
+                        )">
+                            Review
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!-- Single Custom Modal -->
+    <div class="custom-modal-backdrop" id="modalBackdrop"></div>
+    <div class="custom-modal" id="customModal">
+        <div class="custom-modal-header">
+            <h5>Review Application</h5>
+            <button type="button" class="custom-close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="custom-modal-body">
+            <form method="POST" id="reviewForm">
+                {% csrf_token %}
+                <h4 class="text-primary">Student Information</h4>
+                <p><strong>Name:</strong> <span id="modal-name"></span></p>
+
+                <p><strong>Email:</strong> <span id="modal-email"></span></p>
+                <p><strong>Program:</strong> <span id="modal-program"></span></p>
+                <p><strong>Year:</strong> <span id="modal-year"></span></p>
+                <p><strong>GPA:</strong> <span id="modal-gpa"></span></p>
+                <h4 class="text-primary">Application Details</h4>
+                <p><strong>Aid Program:</strong> <span id="modal-aid-program"></span></p>
+                <p><strong>Current Status:</strong> <span id="modal-status"></span></p>
+                <label for="status" class="form-label">Update Status:</label>
+                <select name="status" id="modal-update-status" class="form-select">
+                    <option value="approved">Approve</option>
+                    <option value="rejected">Reject</option>
+                    <option value="additional_info">Request More Info</option>
+                </select>
+                <label for="officer_comment" class="form-label mt-3">Comments:</label>
+                <textarea name="officer_comment" id="modal-comment" class="form-control" rows="4"></textarea>
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn-success">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        function openModal(id, name, email, program, year, gpa, aidProgram, statusDisplay, status, comment) {
+            document.getElementById("reviewForm").action = `/review-application/${id}/`;
+            
+            document.getElementById("modal-name").textContent = name;
+            document.getElementById("modal-email").textContent = email;
+            document.getElementById("modal-program").textContent = program;
+            document.getElementById("modal-year").textContent = year;
+            document.getElementById("modal-gpa").textContent = gpa;
+            document.getElementById("modal-aid-program").textContent = aidProgram;
+            document.getElementById("modal-status").textContent = statusDisplay;
+            document.getElementById("modal-update-status").value = status;
+            document.getElementById("modal-comment").value = comment;
+            document.getElementById("customModal").style.display = "block";
+            document.getElementById("modalBackdrop").style.display = "block";
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            const modalBackdrop = document.querySelector(".custom-modal-backdrop");
+            const modal = document.querySelector(".custom-modal");
+            const closeModalButtons = document.querySelectorAll(".custom-close-btn, .btn-secondary");
+        
+            function closeModal() {
+                modal.style.display = "none";
+                modalBackdrop.style.display = "none";
+            }
+        
+            closeModalButtons.forEach(button => {
+                button.addEventListener("click", closeModal);
+            });
+        
+            modalBackdrop.addEventListener("click", closeModal);
+        });
+        
+        function closeModal() {
+            document.getElementById("customModal").style.display = "none";
+            document.getElementById("modalBackdrop").style.display = "none";
+        }
+        document.getElementById("modalBackdrop").addEventListener("click", closeModal);
+    </script>
+</body>
+</html>

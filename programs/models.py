@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.db import models
 from django.utils.timezone import now
+
 class AidProgram(models.Model):
     STATUS_CHOICES = [
         ('OPEN', 'Open'),
@@ -36,6 +37,7 @@ class AidProgram(models.Model):
     approval_status = models.CharField(max_length=10, choices=APPROVAL_CHOICES, default='PENDING')
     def __str__(self):
         return self.name
+    
 # The ApplicationStatus model keeps track of students' applications for aid programs.
 class ApplicationStatus(models.Model):
     # Different statuses an application can have.
@@ -70,6 +72,7 @@ class ApplicationStatus(models.Model):
     def __str__(self):
         return f"{self.student.username} - {self.aid_program.name} - {self.status}"  
     # Returns the aid program name and current status when printed.
+
 # The AppealStatus model tracks appeals submitted by students if their application was rejected.
 class AppealStatus(models.Model):
     application = models.ForeignKey(ApplicationStatus, on_delete=models.CASCADE)  

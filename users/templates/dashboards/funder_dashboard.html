@@ -94,6 +94,12 @@
                 <button type="submit" class="delete-button" >Continue</button>
             </form>
         </div> <!-- Close Delete Account Section -->
+    {% elif active_tab == 'status'%}
+        {% include "my_proposals.html" with my_aids=my_aids %}
+    
+    {% elif active_tab == 'fund_proposal'%}
+        {% include 'propose_aid_program.html' with form=form%}
+
     {% endif%}
 
     {% include 'others/profilemodal.html' %}
