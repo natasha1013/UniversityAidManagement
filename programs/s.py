@@ -31,14 +31,11 @@ class AidProgram(models.Model):
     required_documents = models.TextField(blank=True, null=True)  # List of required docs (comma-separated)
     max_applicants = models.IntegerField(null=True, blank=True)  # Optional limit on applications
     total_funds = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  # Total available funds
-
     def __str__(self):
         return self.name
-
-
+    
 class ApplicationStatus(models.Model):
     """Tracks student applications for aid programs."""
-
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('under_review', 'Under Review'),
@@ -47,7 +44,6 @@ class ApplicationStatus(models.Model):
         ('additional_info', 'Additional Info Required'),
         ('submitted_to_funder', 'Submitted to Funder'),
     ]
-
     aid_program = models.ForeignKey(AidProgram, on_delete=models.CASCADE)  # Link to aid program
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="applications")  # Student applicant
     aid_officer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="reviews")  # Reviewing officer
@@ -56,14 +52,11 @@ class ApplicationStatus(models.Model):
     supporting_documents = models.FileField(upload_to="documents/", null=True, blank=True)  # Uploaded docs
     officer_comment = models.TextField(blank=True, null=True)  # Comments from officers
     allocated_funds = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Approved fund amount
-
     def __str__(self):
         return f"{self.aid_program.name} - {self.student.username} - {self.status}"
-
-
+    
 class AppealStatus(models.Model):
     """Handles appeals for rejected applications."""
-
     application = models.ForeignKey(ApplicationStatus, on_delete=models.CASCADE)  # Link to application
     appeal_reason = models.TextField()  # Reason for appeal
     appeal_date = models.DateField(default=now)  # Date appeal was submitted
@@ -76,6 +69,5 @@ class AppealStatus(models.Model):
         ],
         default='PENDING'
     )
-
     def __str__(self):
         return f"Appeal for {self.application.aid_program.name} - {self.appeal_status}"
