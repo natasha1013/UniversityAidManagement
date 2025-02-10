@@ -169,7 +169,13 @@
                             </tbody>
                         </table>
                     </section> <!-- Close Impact Report Section -->
-                    
+
+                {% elif active_tab == 'financial_aid' %}
+                    {% include "aid_list.html" with aids=aids_list %}
+
+                {% elif active_tab == 'application_status' %}
+                    {% include "application_status.html" with applications=application_statuses %}
+
                 {% endif %}
                 
             {% endblock dashboard %}

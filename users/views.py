@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
-
+from programs.models import *
 from chats.models import Chat
 from .forms import *
 from django.db.models import Q
@@ -211,6 +211,29 @@ def get_active_menu(active_tab, role):
         },
     }
     return role_menus.get(role, {}).get(active_tab, 'default_menu')
+
+def get_aids_list():
+    """
+    Returns all aid programs from the database.
+    """
+    return AidProgram.objects.all()
+
+def get_application_statuses(user):
+    """
+    Returns application statuses based on the user's role:
+    - Students can view only their own applications.
+    - Aid officers can view all applications.
+    """
+    # Check if the user is a student or an aid officer
+    if user.role == 'student':
+        # Students can only see their own applications
+        return ApplicationStatus.objects.filter(student=user)
+    elif user.role == 'officer':
+        # Aid officers can see all applications
+        return ApplicationStatus.objects.all()
+    else:
+        # Raise an error for unsupported roles
+        raise PermissionDenied("You do not have permission to view application statuses.")
 
 def filter_system_logs(queryset, action_type=None, search_query=None):
     if action_type:
@@ -588,6 +611,8 @@ def officer_dashboard(request):
     if active_tab == 'chat':
         chat_users = get_chat_users(request.user)
 
+    application_statuses = get_application_statuses(request.user)
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
@@ -596,6 +621,7 @@ def officer_dashboard(request):
         'feedback_list' : feedback_list,
         'notifications_list': notifications_list,
         'chat_users': chat_users,
+        'application_statuses': application_statuses,  # Add application statuses to the context
     }
 
     return render(request, 'dashboards/officer_dashboard.html', context)
@@ -620,6 +646,9 @@ def student_dashboard(request):
     # Fetch chat-related data if the active tab is 'chat'
     if active_tab == 'chat':
         chat_users = get_chat_users(request.user)
+    
+    aids_list = get_aids_list()
+    application_statuses = get_application_statuses(request.user)
 
     # Fetch data based on the active tab
     context = {
@@ -629,6 +658,8 @@ def student_dashboard(request):
         'feedback_list' : feedback_list,
         'notifications_list': notifications_list,
         'chat_users': chat_users,  # Pass the list of chat users to the template
+        'aids_list': aids_list,  # Add the list of aid programs to the context
+        'application_statuses': application_statuses,  # Add application statuses to the context
     }
 
     if active_tab == 'my_profile':
