@@ -5,6 +5,12 @@
     Funder Dashboard
 {% endblock dashboard_title %}
 
+{% block statics %}
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock statics %}
+
+
 {% block menu %}
     
     <a href="{% url 'dashboard' %}?tab=aid_application" class="menu-item {% if active_menu == 'fund_disbursements' %}active{% endif %}">
@@ -23,6 +29,40 @@
         My Profile
     </a>
 {% endblock menu %}
+
+{% block content %}
+    <div class="container"> 
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <img src="{% static "img/logo.png" %}" alt="Lilac Grove Logo">
+                <h1>LILAC GROVE UNIVERSITY AID MANAGEMENT</h1>
+            </div>
+            <nav class="menu">
+             
+                <a href="{% url 'dashboard' %}?tab=financial_aid" class="menu-item {% if active_menu == 'homepage' %}active{% endif %}">
+                    Homepage
+                </a>
+                <a href="{% url 'dashboard' %}?tab=my_profile" class="menu-item {% if active_menu == 'profile' %}active{% endif %}">
+                    Profile
+                </a>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <!-- Navbar -->
+            <div class="navbar">
+                <div class="tabs">
+                    {% for item in navbar_content %}
+                    <a href="{% url 'dashboard' %}?tab={{ item.tab }}" class="tab {% if active_tab == item.tab %}active{% endif %}">
+                        {{ item.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+                <div class="logout">
+                    <a href="{% url "logout" %}">Logout</a>
+                </div>
+            </div>
 
 {% block dashboard %}
     {% if active_tab == 'my_profile'%}
@@ -95,8 +135,16 @@
             </form>
         </div> <!-- Close Delete Account Section -->
 
+    {% elif active_tab == 'status'%}
+        {% include 'my_proposals.html' %}
+
+    {% elif active_tab == 'fund_proposal'%}
+        {% include 'propose_aid_program.html' %}
+        
     {% endif%}
 
     {% include 'others/profilemodal.html' %}
     
 {% endblock dashboard %}
+
+{% endblock content %}
