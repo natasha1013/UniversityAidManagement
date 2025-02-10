@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 
     # created
     'users',
+    'programs',
     'feedbacks',
     'chats',
     'notifications',

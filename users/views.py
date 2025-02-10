@@ -17,6 +17,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from feedbacks.models import Feedback
 from notifications.models import Notification, SystemLog
+from programs.models import AidProgram, ApplicationStatus, AppealStatus
+
 
 
 ## Navigations
@@ -557,7 +559,6 @@ def admin_dashboard(request):
         'chat_users': chat_users,
     }
 
-    
 
     if active_tab == 'pending_users':
         context['pending_users'] = Account.objects.filter(is_approved=False)
@@ -571,6 +572,8 @@ def admin_dashboard(request):
 @login_required
 def officer_dashboard(request):
     active_tab = request.GET.get('tab', 'notification')
+    application_id = request.GET.get('application_id')  # Get application ID if reviewing
+
 
     # Determine the active menu based on the tab or other logic
     active_menu = get_active_menu(active_tab, request.user.role)
@@ -597,6 +600,30 @@ def officer_dashboard(request):
         'notifications_list': notifications_list,
         'chat_users': chat_users,
     }
+    
+    # Manage aid applications
+    if active_tab == 'aid_application':
+        applications = ApplicationStatus.objects.all().order_by('status')
+        context['applications'] = applications
+
+        # If reviewing an application
+        if application_id:
+            application = get_object_or_404(ApplicationStatus, id=application_id)
+
+            if request.method == "POST":
+                if not request.user.is_staff:
+                    messages.error(request, "You are not authorized to review this application.")
+                    return redirect("manage_aid_applications")
+
+                application.status = request.POST.get("status")
+                application.officer_comment = request.POST.get("officer_comment", "")
+                application.aid_officer = request.user
+                application.save()
+                messages.success(request, "Application status updated successfully.")
+                return redirect("manage_aid_applications")
+
+            context['application'] = application  # Pass the specific application to the template
+
 
     return render(request, 'dashboards/officer_dashboard.html', context)
 
@@ -635,6 +662,17 @@ def student_dashboard(request):
         # Fetch the logged-in user's data
         logged_in_user = request.user  # Get the currently logged-in user
         context['user_profile'] = logged_in_user  # Pass the user's profile to the template
+        
+    elif active_tab == 'financial_aid':
+        # Fetch financial aid programs
+        aid_list = AidProgram.objects.all()  # Assuming you have an AidProgram model
+        context['aids'] = aid_list  # Pass the aid list to the template
+    
+    elif active_tab == 'application_status':
+        # Fetch aid programs application_status
+        application_status = ApplicationStatus.objects.filter(student=request.user)
+        context['applications'] = application_status  # Pass the application_status to the template
+
 
     return render(request, 'dashboards/dashboard.html', context)
 

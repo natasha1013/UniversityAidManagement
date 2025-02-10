@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Review Aid Program Proposals</h2>
+{% for aid in pending_aids %}
+    <p>{{ aid.name }} - Proposed by: {{ aid.proposed_by.username }}</p>
+    <a href="{% url 'approve_aid' aid.id %}">Approve</a> | 
+    <a href="{% url 'reject_aid' aid.id %}">Reject</a>
+{% endfor %}
+{% endblock %}

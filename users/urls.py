@@ -18,4 +18,8 @@ urlpatterns = [
 
     path('logout/', views.logout_view, name='logout'),
     path('', views.home, name='home'),
+    
+    path('profile/officer-dashboard/', views.officer_dashboard, name='officer_dashboard'),
+    path('profile/?tab=aid_application/<int:application_id>/', review_application, name='review_application'),
+
 ]
