@@ -1,47 +1,37 @@
 {% extends 'base.html' %}
-
 {% block title %}My Applications{% endblock %}
-
 {% block content %}
 <style>
-
     table {
         width: 100%;
         border-collapse: collapse;
     }
-
     th, td {
         border: 1px solid #ddd;
         padding: 8px;
         text-align: center;
     }
-
     th {
         background-color: #f4f4f4;
         font-weight: bold;
     }
-
     .badge-pending {
         color: #856404;
         font-weight: bold;
     }
-
     .badge-approved {
         color: green;
         font-weight: bold;
     }
-
     .badge-rejected {
         color: red;
         font-weight: bold;
     }
-
     .alert {
         font-weight: bold;
         text-align: center;
         margin: 20px 0;
     }
-
     .btn-custom {
         background-color: #343a40;
         color: white;
@@ -52,24 +42,18 @@
         display: inline-block;
         margin: 20px auto;
     }
-
     .btn-custom:hover {
         background-color: #23272b;
         text-decoration: none;
     }
-
     h2 {
         text-align: left;
         font-weight: bold;
         margin-bottom: 20px;
     }
 </style>
-
 <h2>Application Status</h2>
-
-
 <div class="container mt-4">
-
     {% if applications %}
     <div class="table-container">
         <table>
@@ -102,7 +86,5 @@
     {% else %}
     <div class="alert alert-info">You have not applied for any aid programs yet.</div>
     {% endif %}
-
-
 </div>
 {% endblock %}
