@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}List of Financial Aids{% endblock %}
+
+
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List of Financial Aids</title>
+    <link rel="stylesheet" href="{% static 'css/aid_list.css' %}">
+</head>
+<body>
+    <h1>List of Financial Aids</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Status</th>
+                <th>Name</th>
+                <th>Owner</th>
+                <th>Type</th>
+                <th>Level</th>
+                <th>Locality</th>
+                <th>Closing Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for aid in aids %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td class="{{ aid.status|lower }}">{{ aid.status }}</td>
+                <td>
+                    <a href="{% url 'aid_details' aid.id %}">{{ aid.name }}</a>
+                </td>
+                <td>{{ aid.owner }}</td>
+                <td>{{ aid.aid_type }}</td>
+                <td>{{ aid.level }}</td>
+                <td>{{ aid.locality }}</td>
+                <td>{{ aid.closing_date }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">No financial aids available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Aid Details Modal -->
+    <div id="aid-details-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3 id="aid-name"></h3>
+            <p><strong>Eligibility Requirements:</strong></p>
+            <ul id="eligibility-list"></ul>
+            <button id="apply-button">Apply</button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".view-details").forEach(item => {
+            item.addEventListener("click", function(event) {
+                event.preventDefault();
+                let programId = this.getAttribute("data-id");
+
+                fetch(`/aid-details/${programId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("aid-name").innerText = data.name;
+
+                        let eligibilityList = document.getElementById("eligibility-list");
+                        eligibilityList.innerHTML = "";
+                        data.eligibility.forEach(item => {
+                            let li = document.createElement("li");
+                            li.textContent = item;
+                            eligibilityList.appendChild(li);
+                        });
+
+                        document.getElementById("apply-button").setAttribute("data-id", programId);
+                        document.getElementById("aid-details-modal").style.display = "block";
+                    });
+            });
+        });
+
+        document.getElementById("apply-button").addEventListener("click", function() {
+            let programId = this.getAttribute("data-id");
+            fetch(`/apply/${programId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({})
+            }).then(response => response.json())
+              .then(data => {
+                  alert(data.message);
+                  document.getElementById("aid-details-modal").style.display = "none";
+              });
+        });
+
+        document.querySelector(".close").addEventListener("click", function() {
+            document.getElementById("aid-details-modal").style.display = "none";
+        });
+    });
+    </script>
+</body>
+</html>
+{% endblock %}

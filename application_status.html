@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}My Applications{% endblock %}
+
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/application_status.css' %}">
+<h2>Application Status</h2>
+
+
+<div class="container mt-4">
+
+    {% if applications %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Status</th>
+                    <th>Aid Program</th>
+                    <th>Last Updated</th>
+                    <th>Officer Comments</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="badge-{{ app.status|lower }}">{{ app.get_status_display }}</td>
+                    <td>{{ app.aid_program.name }}</td>
+                    <td>{{ app.last_update|date:"d M Y" }}</td>
+                    <td>{{ app.officer_comment|default:"No comments yet" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No applications available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">You have not applied for any aid programs yet.</div>
+    {% endif %}
+
+
+</div>
+{% endblock %}
