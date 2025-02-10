@@ -213,10 +213,20 @@ def get_active_menu(active_tab, role):
     }
     return role_menus.get(role, {}).get(active_tab, 'default_menu')
 
-def get_aids_list():
+def get_aids_list(user=None):
     """
-    Returns all aid programs from the database.
+    Returns a queryset of aid programs based on the user's role:
+    - Students: Only see aid programs with approval_status='APPROVED'.
+    - Other roles (e.g., admin, officer): See all aid programs.
     """
+    if user is None:
+        raise ValueError("A user must be provided to filter aid programs.")
+    
+    # Students can only see approved aid programs
+    if user.role == 'student':
+        return AidProgram.objects.filter(approval_status='APPROVED')
+    
+    # All other roles see all aid programs
     return AidProgram.objects.all()
 
 def get_application_statuses(user):
@@ -588,7 +598,7 @@ def admin_dashboard(request):
 
     pending_aids = AidProgram.objects.filter(approval_status='PENDING').order_by('-closing_date')
 
-    aids_list = get_aids_list()
+    aids_list = get_aids_list(request.user)
 
     # Fetch data based on the active tab
     context = {
@@ -673,7 +683,7 @@ def student_dashboard(request):
     if active_tab == 'chat':
         chat_users = get_chat_users(request.user)
     
-    aids_list = get_aids_list()
+    aids_list = get_aids_list(request.user)
     application_statuses = get_application_statuses(request.user)
 
     # Fetch data based on the active tab

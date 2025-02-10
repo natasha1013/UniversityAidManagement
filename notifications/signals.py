@@ -6,6 +6,7 @@ from .models import Notification, SystemLog
 from users.models import Account
 from feedbacks.models import Feedback
 from chats.models import Chat
+from programs.models import *
 
 User = get_user_model()
 
@@ -133,6 +134,146 @@ def send_chat_notification(sender, instance, created, **kwargs):
                 message=f"You have a new message from {instance.sender.username}.",
                 read=False
             )
+
+@receiver(post_save, sender=AidProgram)
+def notify_on_funding_proposal_submission(sender, instance, created, **kwargs):
+    """
+    Sends notifications when a funder submits a funding proposal.
+    Also logs the submission in the system logs.
+    """
+    if created:
+        # Notify admins about the new funding proposal
+        admins = User.objects.filter(is_staff=True)
+        for admin in admins:
+            Notification.objects.create(
+                user=admin,
+                message=f"A new funding proposal has been submitted by {instance.proposed_by.username}: {instance.name}."
+            )
+        
+        # Notify the funder that their proposal has been submitted
+        Notification.objects.create(
+            user=instance.proposed_by,
+            message=f"Your funding proposal '{instance.name}' has been submitted for review."
+        )
+        
+        # Log the submission in the system logs
+        SystemLog.objects.create(
+            action_type='funding_proposal_submission',
+            description=f"Funding proposal '{instance.name}' submitted by {instance.proposed_by.username}.",
+            user=instance.proposed_by
+        )
+
+@receiver(pre_save, sender=AidProgram)
+def capture_old_aid_program_values(sender, instance, **kwargs):
+    """
+    Captures old field values before saving an AidProgram instance.
+    """
+    if instance.pk:  # Only capture if instance exists
+        try:
+            old_instance = AidProgram.objects.get(pk=instance.pk)
+            old_values[instance.pk] = {
+                "name": old_instance.name,
+                "status": old_instance.status,
+                "approval_status": old_instance.approval_status,
+            }
+        except AidProgram.DoesNotExist:
+            pass  # If instance doesn't exist yet, do nothing
+
+@receiver(post_save, sender=AidProgram)
+def notify_on_funding_proposal_status_change(sender, instance, **kwargs):
+    """
+    Sends notifications when the status of a funding proposal changes.
+    Also logs the status change in the system logs.
+    """
+    if instance.pk not in old_values:
+        return  # Skip notifications for new proposals
+    old_data = old_values.pop(instance.pk, {})  # Retrieve old values and remove from storage
+
+    # Check if approval_status has changed
+    old_approval_status = old_data.get("approval_status", None)
+    new_approval_status = instance.approval_status
+    if old_approval_status != new_approval_status:
+        # Notify the funder about the status change
+        Notification.objects.create(
+            user=instance.proposed_by,
+            message=f"The status of your funding proposal '{instance.name}' has been updated to {instance.get_approval_status_display()}."
+        )
+        
+        # Log the status change in the system logs
+        SystemLog.objects.create(
+            action_type='funding_proposal_status_change',
+            description=f"Funding proposal '{instance.name}' status changed from {old_approval_status} to {new_approval_status}.",
+            user=instance.proposed_by
+        )
+
+### Notifications and Logs for ApplicationStatus (Student Applications)
+@receiver(post_save, sender=ApplicationStatus)
+def notify_on_application_submission(sender, instance, created, **kwargs):
+    """
+    Sends notifications when a student submits an application.
+    Also logs the submission in the system logs.
+    """
+    if created:
+        # Notify the aid officer (if assigned)
+        if instance.aid_officer:
+            Notification.objects.create(
+                user=instance.aid_officer,
+                message=f"New application received from {instance.student.username} for {instance.aid_program.name}."
+            )
+        
+        # Notify the student that their application has been submitted
+        Notification.objects.create(
+            user=instance.student,
+            message=f"You have successfully applied for {instance.aid_program.name}."
+        )
+        
+        # Log the submission in the system logs
+        SystemLog.objects.create(
+            action_type='application_submission',
+            description=f"New application submitted by {instance.student.username} for {instance.aid_program.name}.",
+            user=instance.student
+        )
+
+@receiver(pre_save, sender=ApplicationStatus)
+def capture_old_application_status_values(sender, instance, **kwargs):
+    """
+    Captures old field values before saving an ApplicationStatus instance.
+    """
+    if instance.pk:  # Only capture if instance exists
+        try:
+            old_instance = ApplicationStatus.objects.get(pk=instance.pk)
+            old_values[instance.pk] = {
+                "status": old_instance.status,
+            }
+        except ApplicationStatus.DoesNotExist:
+            pass  # If instance doesn't exist yet, do nothing
+
+@receiver(post_save, sender=ApplicationStatus)
+def notify_on_application_status_change(sender, instance, **kwargs):
+    """
+    Sends notifications when the status of an application changes.
+    Also logs the status change in the system logs.
+    """
+    if instance.pk not in old_values:
+        return  # Skip notifications for new applications
+    old_data = old_values.pop(instance.pk, {})  # Retrieve old values and remove from storage
+
+    # Check if status has changed
+    old_status = old_data.get("status", None)
+    new_status = instance.status
+    if old_status != new_status:
+        # Notify the student about the status change
+        Notification.objects.create(
+            user=instance.student,
+            message=f"The status of your application for {instance.aid_program.name} has been updated to {instance.get_status_display()}."
+        )
+        
+        # Log the status change in the system logs
+        SystemLog.objects.create(
+            action_type='application_status_change',
+            description=f"Application status for {instance.student.username} changed from {old_status} to {new_status}.",
+            user=instance.student
+        )
 
 ### System Log ###
 @receiver(post_save, sender= Account)
