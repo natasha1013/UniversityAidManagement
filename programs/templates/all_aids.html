@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}All Financial Aids{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white text-center">
+            <h2 class="mb-0">All Financial Aids</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center shadow-sm">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>No.</th>
+                            <th>Status</th>
+                            <th>Name</th>
+                            <th>Owner</th>
+                            <th>Type</th>
+                            <th>Level</th>
+                            <th>Locality</th>
+                            <th>Closing Date</th>
+                            {% if user.is_staff %}
+                            <th>Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for aid in all_aids %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <span class="{% if aid.approval_status == 'Open' %}text-success fw-bold{% else %}text-danger fw-bold{% endif %}">
+                                    {{ aid.approval_status }}
+                                </span>
+                            </td>
+                            <td>{{ aid.name }}</td>
+                            <td>{{ aid.owner }}</td>
+                            <td>{{ aid.aid_type }}</td>
+                            <td>{{ aid.level }}</td>
+                            <td>{{ aid.locality }}</td>
+                            <td>{{ aid.closing_date|date:"F j, Y" }}</td>
+                            {% if user.is_staff %}
+                            <td>
+                                <a href="{% url 'edit_aid' aid.id %}" class="btn btn-warning btn-sm shadow-sm">
+                                    Edit
+                                </a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-muted text-center py-4">
+                                <i class="fas fa-info-circle fa-3x mb-2 text-primary"></i>
+                                <p class="fs-5 fw-semibold">No financial aids available.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
