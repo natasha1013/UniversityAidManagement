@@ -1,47 +1,22 @@
 {% load static %}
 
-    <title>Chat Interface</title>
-    <link rel="stylesheet" href="{% static 'css/test.css' %}">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/chat.css' %}">
+    <title>Chat</title>
 
-    <div class="container"> 
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo">
-                <img src="{% static "img/logo.png" %}" alt="Lilac Grove Logo">
-                <h1>LILAC GROVE UNIVERSITY AID MANAGEMENT</h1>
-            </div>
-            <nav class="menu">
-                <a href="{% url 'dashboard' %}?tab=financial_aid" class="menu-item {% if active_menu == 'homepage' %}active{% endif %}">
-                    Homepage
-                </a>
-                <a href="{% url 'dashboard' %}?tab=my_profile" class="menu-item {% if active_menu == 'profile' %}active{% endif %}">
-                    Profile
-                </a>
-            </nav>
-        </aside>
-
-        <main class="content">
-            <!-- Navbar -->
-            <div class="navbar">
-                <div class="tabs">
-                    <a href="#" class="tab">Financial Aid</a>
-                    <a href="#" class="tab">Notification</a>
-                    <a href="#" class="tab active">Open Chat</a>
-                </div>
-                <div class="logout">
-                    <a href="{% url "logout" %}">Logout</a>
-                </div>
-            </div>
-
-    <div class="search-header-container">
-        <h2>Chat</h2>
-        <input type="text" id="search-user" placeholder="Search users..." />
-    </div>    
-    <table>
+</head>
+<body>
+<h2>Chat Users</h2>
+<input type="text" id="search-user" placeholder="Search users..." oninput="searchUsers()" style="width: 100%; padding: 10px; margin-bottom: 10px;">
+<table>
     <thead>
         <tr>
             <th>Username</th>
-            <th>Action</th>
+            <th> </th>
         </tr>
     </thead>
     <tbody id="user-list">
@@ -52,11 +27,10 @@
         </tr>
         {% endfor %}
     </tbody>
-    </table>
-    <div id="search-results"></div>
-
-    <!-- Chat Modal -->
-    <div id="chat-modal" class="modal">
+</table>
+<div id="search-results"></div>
+<!-- Chat Modal -->
+<div id="chat-modal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeChat()">&times;</span>
         <h3 id="chat-title">Chat</h3>
@@ -64,9 +38,7 @@
         <input type="text" id="message-input" placeholder="Type a message">
         <button onclick="sendMessage()">Send</button>
     </div>
-    </div>
-
-
+</div>
 <script>
     let currentUserId = {{ request.user.id }};
     let selectedUserId = null;
@@ -152,248 +124,5 @@
             });
     }
 </script>
-
-<style>
-    /* Layout */
-.container {
-    display: flex;
-    min-height: 100vh; /* Ensure at least full viewport height */
-    width: 100%; /* Full width */
-    margin: 0;
-    padding: 0;
-    overflow: hidden; /* Prevent overflow issues */
-}
-
-.sidebar {
-    width: 240px;
-    background-color: #eae8f2;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-}
-
-.logo img {
-    max-width: 120px;
-    margin: 0 auto 20px;
-    display: block;
-}
-
-.menu {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.menu-item {
-    text-decoration: none;
-    color: #4a4a4a;
-    font-size: 16px;
-    padding: 10px;
-    text-align: center;
-    border-radius: 8px;
-    transition: background-color 0.3s;
-}
-
-.menu-item:hover, .menu-item.active {
-    background-color: #d1cde5;
-    color: #4a4a4a;
-}
-
-.content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    box-sizing: border-box;
-    width: calc(100% - 240px); /* Subtract sidebar width */
-    overflow-y: auto; /* Enable scrolling within the content area */
-}
-
-/* Navbar */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.tabs {
-    display: flex;
-    gap: 20px;
-}
-
-.tab {
-    text-decoration: none;
-    font-weight: bold;
-    color: #4a4a4a;
-    padding: 5px 10px;
-    border-bottom: 2px solid transparent;
-    transition: border-color 0.3s;
-}
-
-.tab.active {
-    border-color: #6b6bdf;
-}
-
-.logout a {
-    text-decoration: none;
-    color: #4a4a4a;
-    font-weight: bold;
-}
-
-
-/* Wrapper for header and search bar */
-.search-header-container {
-    display: flex;
-    align-items: center; 
-    gap: 20px; 
-    margin-bottom: 20px; 
-    padding-left: 20px; 
-}
-
-/* For the header */
-.search-header-container h2 {
-    margin: 0; 
-    font-size: 1.5rem; 
-    color: #090909; 
-}
-
-/* For the search bar */
-#search-user {
-    width: 100%; 
-    max-width: 400px;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    margin: 0; 
-}
-
-/* Table Styling */
-table {
-    width: 90%;
-    max-width: 800px;
-    margin: 20px auto;
-    border-collapse: collapse;
-    background: white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-th, td {
-    padding: 15px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-}
-
-th {
-    background-color: #6b6bdf;
-    color: white;
-}
-
-tr:hover {
-    background-color: #f1f1f1;
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 14px;
-    color: white;
-    background-color: #007bff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-/* Modal Styling */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 1000;
-}
-
-.modal-content {
-    background: white;
-    margin: 10% auto;
-    padding: 20px;
-    width: 90%;
-    max-width: 600px;
-    border-radius: 12px;
-    position: relative;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    animation: fadeIn 0.3s ease-out;
-}
-
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    cursor: pointer;
-    color: #333;
-}
-
-#chat-title {
-    font-size: 1.2rem;
-    color: #4a4a4a;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-#messages {
-    height: 300px;
-    overflow-y: auto;
-    padding: 15px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background: #f9f9f9;
-    margin-bottom: 20px;
-    font-size: 14px;
-}
-
-#message-input {
-    width: calc(100% - 110px);
-    padding: 12px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-}
-
-.modal-content button {
-    float: right;
-    padding: 12px 20px;
-    font-size: 14px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.modal-content button:hover {
-    background-color: #0056b3;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-</style>
+</body>
+</html>
