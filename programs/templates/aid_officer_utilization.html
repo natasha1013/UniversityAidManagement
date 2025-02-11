@@ -6,26 +6,72 @@
 <!-- Table Styling -->
 <style>
     table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-    }
-    th, td {
-        border: 1px solid black;
-        padding: 8px;
-        text-align: left;
-    }
-    th {
-        background-color: #f2f2f2;
-    }
-    .flagged {
-        color: red;
-        font-weight: bold;
-    }
-    .not-flagged {
-        color: green;
-        font-weight: bold;
-    }
+    width: 100%;
+    max-width: none;
+    margin: 20px 0;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 10px 12px; 
+    font-size: 15px; 
+    line-height: 1; 
+    text-align: left;
+}
+
+th {
+    background-color: #F4F3FA; 
+    font-weight: bold;
+    padding: 15px;
+    text-align: left;
+}
+
+td {
+    border-bottom: 1px solid #ddd;
+}
+
+tr {
+    height: 30px; 
+  }
+
+tr:nth-child(even) {
+    background-color: #F9F8FD; /
+}
+
+tr:nth-child(odd) {
+    background-color: #FFFFFF;
+}
+
+.flag-button {
+    background-color: #007bff; 
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+    font-size: 14px;
+}
+
+.flag-button:hover {
+    background-color: #0056b3; /
+}
+
+/* Status Styling */
+.flagged {
+    color: red;
+    font-weight: bold;
+}
+
+.not-flagged {
+    color: green;
+    font-weight: bold;
+}
+
 </style>
 
 {% if utilizations %}
@@ -35,7 +81,7 @@
         <th>Aid Program</th>
         <th>Category</th>
         <th>Amount Used</th>
-        <th>Status</th>  <!-- New Column -->
+        <th>Status</th>  
         <th>Flag</th>
     </tr>
     {% for record in utilizations %}
@@ -55,8 +101,7 @@
             {% if not record.flagged %}
             <form method="POST" action="{% url 'flag_fund_utilization' record.id %}">
                 {% csrf_token %}
-                <input type="hidden" name="record_id" value="{{ record.id }}">
-                <button type="submit" onclick="return confirm('Are you sure you want to flag this record?');" title="Mark this fund utilization as flagged">
+                <button type="submit" class="flag-button" onclick="return confirm('Are you sure you want to flag this record?');">
                     Flag
                 </button>
             </form>
