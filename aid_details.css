@@ -1,0 +1,173 @@
+/* General container styling */
+.container {
+    max-width: 1000px; /* Ensure everything is wider */
+    width: 100%;
+    margin: 20px auto;
+    padding: 20px;
+    background: #F5F4FA;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Page title */
+h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Card styling */
+.card {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 95%; /* Ensure card takes full width */
+}
+
+/* Text alignment */
+.card p {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #555;
+    text-align: left;
+}
+
+/* Labels inside card */
+.card p strong {
+    color: #222;
+}
+
+/* Status color */
+.text-danger {
+    color: red;
+    font-weight: bold;
+}
+
+/* Buttons Section */
+.mt-4 {
+    margin-top: 10px;
+    padding-top: 20px;
+    text-align: left; /* Ensure buttons align left */
+    width: 100%; /* Expand buttons section */
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 12px 20px; /* Increased padding */
+    font-size: 16px;
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+    margin-right: 10px;
+    min-width: 180px; /* Make buttons wider */
+}
+
+/* Apply Now button */
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* Closed scholarship button */
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    cursor: not-allowed;
+}
+
+/* Back to Financial Aid button */
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Alert messages */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+/* Success message (green) */
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 5px solid #28a745;
+}
+
+/* Error message (red) */
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 5px solid #dc3545;
+}
+
+/* Warning message (yellow) */
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 5px solid #ffc107;
+}
+
+/* Info message (blue) */
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 5px solid #17a2b8;
+}
+
+/* Close button styling */
+.alert .btn-close {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #000;
+    padding: 5px;
+}
+
+/* Adjusting everything to be wider */
+.alert-success, .alert-danger, .alert-warning, .alert-info {
+    width: 95%;
+    display: block;
+}
+
+/* Left-align login prompt */
+.text-muted {
+    text-align: left;
+}
+
+/* Login link */
+.text-muted a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.text-muted a:hover {
+    text-decoration: underline;
+}

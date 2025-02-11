@@ -12,7 +12,7 @@ table {
 /* Table headers */
 thead th {
     background-color: #f5f4fa; /* Light purple header background */
-    padding: 15px 20px; /* Increased padding for spacing */
+    padding: 15px 5px; /* Increased padding for spacing */
     text-align: left;
     font-weight: bold;
 }
@@ -28,7 +28,7 @@ tbody tr:hover {
 
 /* Table cells */
 td, th {
-    padding: 15px 25px; /* Increased padding for spacing */
+    padding: 15px 5px; /* Increased padding for spacing */
     text-align: center;
     border-bottom: 1px solid #ddd;
     white-space: nowrap; /* Prevents text from breaking into multiple lines */
