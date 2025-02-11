@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}My Submitted Proposals{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white text-center py-3">
+            <h2 class="mb-0">My Submitted Proposals</h2>
+        </div>
+        <div class="card-body">
+            {% if my_aids %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="text-center">No.</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Submitted On</th>
+                            <th>Closing Date</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for aid in my_aids %}
+                        <tr>
+                            <td class="text-center">{{ forloop.counter }}</td>
+                            <td>{{ aid.name }}</td>
+                            <td>{{ aid.aid_type }}</td>
+                            <td>{{ aid.created_at|date:"Y-m-d" }}</td>
+                            <td>{{ aid.closing_date }}</td>
+                            <td class="text-center">
+                                {% if aid.approval_status == "PENDING" %}
+                                    <span class="badge rounded-pill bg-warning text-dark px-3 py-2">Pending</span>
+                                {% elif aid.approval_status == "APPROVED" %}
+                                    <span class="badge rounded-pill bg-success px-3 py-2">Approved</span>
+                                {% else %}
+                                    <span class="badge rounded-pill bg-danger px-3 py-2">Rejected</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center text-muted fs-5">You have not submitted any aid proposals yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

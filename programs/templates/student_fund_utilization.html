@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Center everything */
+
+
+    /* Styling for the table */
+    .table-container {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    th, td {
+        border: 1px solid black;
+        padding: 12px;
+        text-align: left;
+        min-width: 150px; /* Ensures minimum width */
+        word-wrap: break-word;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    /* Styling for the form */
+    .form-container {
+        width: 50%;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    /* Button styling */
+    button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+</style>
+
+
+    <!-- Table Section -->
+    <div class="table-container">
+        <h2>Fund Utilization</h2>
+        <h3>Your Fund Utilization Records</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Aid Program</th>
+                    <th>Category</th>
+                    <th>Amount (RM)</th>
+                    <th>Description</th>
+                    <th>Transaction Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in fund_utilizations %}
+                <tr>
+                    <td>{{ record.aid_program.name }}</td>
+                    <td>{{ record.get_category_display }}</td>
+                    <td>{{ record.amount }}</td>
+                    <td>{{ record.description }}</td>
+                    <td>{{ record.transaction_date }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5">No records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Form Section (Below the Table) -->
+    <div class="form-container">
+        <h3>Add Fund Utilization</h3>
+        <form method="post">
+            {% csrf_token %}
+            <label for="id_aid_program">Aid Program:</label>
+            <select name="aid_program" required>
+                {% for app in approved_apps %}
+                <option value="{{ app.aid_program.id }}">{{ app.aid_program.name }}</option>
+                {% endfor %}
+            </select>
+            <br>
+            {{ form.as_p }}
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+
+{% endblock %}

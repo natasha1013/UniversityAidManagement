@@ -6,7 +6,7 @@
 {% endblock dashboard_title %}
 
 {% block menu %}
-    
+
     <a href="{% url 'dashboard' %}?tab=aid_application" class="menu-item {% if active_menu == 'fund_disbursements' %}active{% endif %}">
         Fund Evaluations
     </a>
@@ -14,11 +14,11 @@
     <a href="{% url 'dashboard' %}?tab=status" class="menu-item {% if active_menu == 'fund_programs' %}active{% endif %}">
         Fund Programs
     </a>
-    
+
     <a href="{% url 'dashboard' %}?tab=notification" class="menu-item {% if active_menu == 'communication' %}active{% endif %}">
         Communication &amp; <br> Feedbacks
     </a>
-    
+
     <a href="{% url 'dashboard' %}?tab=my_profile" class="menu-item {% if active_menu == 'profile' %}active{% endif %}">
         My Profile
     </a>
@@ -73,7 +73,7 @@
             <p>To confirm your identity, please verify your password:</p>
             <form method="POST" action="{% url 'delete_account' %}">
                 {% csrf_token %}
-                
+
                 <input
                     type="password"
                     name="password"
@@ -94,9 +94,14 @@
                 <button type="submit" class="delete-button" >Continue</button>
             </form>
         </div> <!-- Close Delete Account Section -->
-        
+    {% elif active_tab == 'status'%}
+        {% include "my_proposals.html" with my_aids=my_aids %}
+    
+    {% elif active_tab == 'fund_proposal'%}
+        {% include 'propose_aid_program.html' with form=form%}
+
     {% endif%}
 
     {% include 'others/profilemodal.html' %}
-    
+
 {% endblock dashboard %}

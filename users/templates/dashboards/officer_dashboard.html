@@ -92,6 +92,9 @@
             </form>
         </div> <!-- Close Delete Account Section -->
 
+    {% elif active_tab == 'aid_application'%}
+        {% include "manage_aid_applications.html" with applications=application_statuses %}
+
     {% endif %}
 
 {% endblock dashboard %}

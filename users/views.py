@@ -8,17 +8,17 @@ from django.urls import reverse
 from django.views import View
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
-
+from programs.models import *
 from chats.models import Chat
 from .forms import *
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, IntegerField
 from .models import Account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from feedbacks.models import Feedback
 from notifications.models import Notification, SystemLog
-from programs.models import AidProgram, ApplicationStatus, AppealStatus
-
+from programs.models import AidProgram, ApplicationStatus, AppealStatus, FundUtilization
+from programs.forms import AidProgramForm, FundUtilizationForm
 
 
 ## Navigations
@@ -213,6 +213,39 @@ def get_active_menu(active_tab, role):
         },
     }
     return role_menus.get(role, {}).get(active_tab, 'default_menu')
+
+def get_aids_list(user=None):
+    """
+    Returns a queryset of aid programs based on the user's role:
+    - Students: Only see aid programs with approval_status='APPROVED'.
+    - Other roles (e.g., admin, officer): See all aid programs.
+    """
+    if user is None:
+        raise ValueError("A user must be provided to filter aid programs.")
+    
+    # Students can only see approved aid programs
+    if user.role == 'student':
+        return AidProgram.objects.filter(approval_status='APPROVED')
+    
+    # All other roles see all aid programs
+    return AidProgram.objects.all()
+
+def get_application_statuses(user):
+    """
+    Returns application statuses based on the user's role:
+    - Students can view only their own applications.
+    - Aid officers can view all applications.
+    """
+    # Check if the user is a student or an aid officer
+    if user.role == 'student':
+        # Students can only see their own applications
+        return ApplicationStatus.objects.filter(student=user)
+    elif user.role == 'officer':
+        # Aid officers can see all applications
+        return ApplicationStatus.objects.all()
+    else:
+        # Raise an error for unsupported roles
+        raise PermissionDenied("You do not have permission to view application statuses.")
 
 def filter_system_logs(queryset, action_type=None, search_query=None):
     if action_type:
@@ -467,6 +500,21 @@ def dashboard(request):
 def funder_dashboard(request):
     active_tab = request.GET.get('tab', 'aid_application')
 
+    # Handle form submission for proposing a new aid program
+    if request.method == "POST" and active_tab == "fund_proposal":
+        form = AidProgramForm(request.POST)
+        if form.is_valid():
+            aid_program = form.save(commit=False)
+            aid_program.proposed_by = request.user  # Set the logged-in user as the proposer
+            aid_program.save()
+            messages.success(request, "Your aid program proposal has been submitted successfully!")
+            return redirect(f'/profile/?tab=status')  # Redirect back to the dashboard
+        else:
+            # Debugging: Print form errors to the console or log them
+            messages.error(request, "There was an error with your submission. Please check the form.")
+    else:
+        form = AidProgramForm()  # Create an empty form for GET requests
+
     # Determine the active menu based on the tab or other logic
     active_menu = get_active_menu(active_tab, request.user.role)
 
@@ -483,6 +531,8 @@ def funder_dashboard(request):
     if active_tab == 'chat':
         chat_users = get_chat_users(request.user)
 
+    my_aids = AidProgram.objects.filter(proposed_by=request.user).order_by('-closing_date')
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
@@ -491,9 +541,64 @@ def funder_dashboard(request):
         'feedback_list' : feedback_list,
         'notifications_list': notifications_list,
         'chat_users': chat_users,
+        'my_aids': my_aids,  # Add the list of aid programs to the context
+        'form': form,  # Pass the form to the template
     }
+    
+    if active_tab == 'status':
+        """Funders can view the status of their submitted aid proposals."""
+        my_aids = AidProgram.objects.filter(proposed_by=request.user)
+        context['my_aids'] = my_aids
+
+    
+    elif active_tab == 'fund_proposal':
+        """Allow funders to propose a new aid program."""
+    
+        # Initialize form
+        form = AidProgramForm()
+
+        if request.method == "POST":
+            form = AidProgramForm(request.POST)
+            if form.is_valid():
+                aid_program = form.save(commit=False)
+                aid_program.proposed_by = request.user
+                aid_program.approval_status = "PENDING"
+                aid_program.save()
+                messages.success(request, "Aid program proposal submitted successfully! Waiting for admin approval.")
+                return redirect(f'/profile/?tab=status') # Redirect to the dashboard after submission
+        
+        # Add form to the context
+        context['form'] = form 
+        
+    elif active_tab == 'aid_application':
+        """List all applications that need funder approval."""
+        fun_applications = ApplicationStatus.objects.filter(status="submitted_to_funder")
+        
+        context['applications'] = fun_applications 
+        
+    elif active_tab == 'fund_utilization':
+        """List all applications that need funder approval."""
+        fun_utilizations = FundUtilization.objects.all()
+        context['utilizations'] = fun_utilizations 
+    
 
     return render(request, 'dashboards/funder_dashboard.html', context)
+
+def funder_approve_application(request, application_id):
+    """Funders approve an application."""
+    application = get_object_or_404(ApplicationStatus, id=application_id)
+    application.status = "approved"
+    application.save()
+    messages.success(request, "Application approved successfully.")
+    return redirect('/funder_dashboard/?tab=aid_application')  # Redirects back to the tab
+
+def funder_reject_application(request, application_id):
+    """Funders reject an application."""
+    application = get_object_or_404(ApplicationStatus, id=application_id)
+    application.status = "rejected"
+    application.save()
+    messages.error(request, "Application rejected.")
+    return redirect(f"{reverse('funder_dashboard')}?tab=aid_application")
 
 # admin-only views
 @role_required('administrator')
@@ -545,6 +650,10 @@ def admin_dashboard(request):
     if active_tab == 'chat':
         chat_users = get_chat_users(request.user)
 
+    pending_aids = AidProgram.objects.filter(approval_status='PENDING').order_by('-closing_date')
+
+    aids_list = get_aids_list(request.user)
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
@@ -557,6 +666,8 @@ def admin_dashboard(request):
         'selected_action_type': action_type,  # Pass the selected action type
         'search_query': search_query,  # Pass the search query
         'chat_users': chat_users,
+        'pending_aids': pending_aids,
+        'aids_list': aids_list,  # Add the list of aid programs to the context
     }
 
 
@@ -564,8 +675,45 @@ def admin_dashboard(request):
         context['pending_users'] = Account.objects.filter(is_approved=False)
     elif active_tab == 'update_user':
         context['users'] = Account.objects.all()
+        
+    elif active_tab == 'approve_requests':
+        """Admin can review and approve/reject proposed aid programs."""
+        pending_aids = AidProgram.objects.filter(approval_status="PENDING")
+        context['pending_aids'] = pending_aids
+    
+    elif active_tab == 'edit_program':
+        """Admin can review and approve/reject proposed aid programs."""
+        all_aids = AidProgram.objects.all()
+        context['all_aids'] = all_aids
 
     return render(request, 'dashboards/admin_dashboard.html', context)
+
+def edit_aid(request, aid_id):
+    aid = get_object_or_404(AidProgram, id=aid_id)
+    if request.method == "POST":
+        form = AidProgramForm(request.POST, instance=aid)
+        if form.is_valid():
+            form.save()
+            return redirect('/profile/?tab=edit_program')
+    else:
+        form = AidProgramForm(instance=aid)
+    return render(request, 'edit_aid.html', {'form': form})
+
+def approve_aid(request, aid_id):
+    """Admin approves an aid program."""
+    aid_program = get_object_or_404(AidProgram, id=aid_id)
+    aid_program.approval_status = "APPROVED"
+    aid_program.save()
+    messages.success(request, "Aid program approved successfully.")
+    return redirect('/admin_dashboard/?tab=approve_requests')  # Redirects back to the tab
+
+def reject_aid(request, aid_id):
+    """Admin rejects an aid program."""
+    aid_program = get_object_or_404(AidProgram, id=aid_id)
+    aid_program.approval_status = "REJECTED"
+    aid_program.save()
+    messages.error(request, "Aid program rejected.")
+    return redirect('/admin_dashboard/?tab=approve_requests')  # Redirects back to the tab
 
 # officer-only views
 @role_required('officer')
@@ -591,6 +739,8 @@ def officer_dashboard(request):
     if active_tab == 'chat':
         chat_users = get_chat_users(request.user)
 
+    application_statuses = get_application_statuses(request.user)
+
     # Fetch data based on the active tab
     context = {
         'active_tab': active_tab,
@@ -603,7 +753,17 @@ def officer_dashboard(request):
     
     # Manage aid applications
     if active_tab == 'aid_application':
-        applications = ApplicationStatus.objects.all().order_by('status')
+        
+        applications = ApplicationStatus.objects.filter(
+            status__in=["pending", "additional_info", "submitted_to_funder"]
+        ).annotate(
+            status_order=Case(
+                When(status="pending", then=Value(1)),
+                When(status="additional_info", then=Value(2)),
+                When(status="submitted_to_funder", then=Value(3)),
+                output_field=IntegerField(),
+            )
+        ).order_by("status_order")
         context['applications'] = applications
 
         # If reviewing an application
@@ -624,6 +784,10 @@ def officer_dashboard(request):
 
             context['application'] = application  # Pass the specific application to the template
 
+    elif active_tab == 'fund_utilization':  
+        """ Aid officers can monitor and flag suspicious transactions """
+        off_utilizations = FundUtilization.objects.all()
+        context['utilizations'] = off_utilizations
 
     return render(request, 'dashboards/officer_dashboard.html', context)
 
@@ -647,6 +811,9 @@ def student_dashboard(request):
     # Fetch chat-related data if the active tab is 'chat'
     if active_tab == 'chat':
         chat_users = get_chat_users(request.user)
+    
+    aids_list = get_aids_list(request.user)
+    application_statuses = get_application_statuses(request.user)
 
     # Fetch data based on the active tab
     context = {
@@ -656,6 +823,8 @@ def student_dashboard(request):
         'feedback_list' : feedback_list,
         'notifications_list': notifications_list,
         'chat_users': chat_users,  # Pass the list of chat users to the template
+        'aids_list': aids_list,  # Add the list of aid programs to the context
+        'application_statuses': application_statuses,  # Add application statuses to the context
     }
 
     if active_tab == 'my_profile':
@@ -672,6 +841,37 @@ def student_dashboard(request):
         # Fetch aid programs application_status
         application_status = ApplicationStatus.objects.filter(student=request.user)
         context['applications'] = application_status  # Pass the application_status to the template
+        
+    elif active_tab == 'fund_utilization':
+        # Fetch aid programs application_status
+        student = request.user
+
+        # Get the student's approved applications
+        approved_apps = ApplicationStatus.objects.filter(student=student, status="approved")
+
+        # Get existing fund utilization records
+        fund_utilizations = FundUtilization.objects.filter(student=student)
+
+        if request.method == "POST":
+            form = FundUtilizationForm(request.POST)
+            if form.is_valid():
+                
+                fund_utilization = form.save(commit=False)
+                fund_utilization.student = student
+                fund_utilization.aid_program_id = request.POST.get("aid_program")  # Set manually
+
+                # Ensure they are updating an approved aid program
+                if not ApplicationStatus.objects.filter(student=student, aid_program=fund_utilization.aid_program, status="approved").exists():
+                    return redirect(f"{reverse('dashboard')}?tab=fund_utilization")                
+                fund_utilization.save()
+                return redirect(f"{reverse('dashboard')}?tab=fund_utilization")
+        else:
+            form = FundUtilizationForm()
+
+        context['form'] = form
+        context['fund_utilizations'] = fund_utilizations
+        context['approved_apps'] = approved_apps
+
 
 
     return render(request, 'dashboards/dashboard.html', context)

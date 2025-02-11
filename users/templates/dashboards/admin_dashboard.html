@@ -174,7 +174,13 @@
 
     {% elif active_tab == 'system_log' %}
         {% include "systemlogs/system_log.html" %}
-        
+    
+    {% elif active_tab == 'approve_requests' %}
+        {% include "review_aid_program.html" with pending_aids=pending_aids %}
+    
+    {% elif active_tab == 'edit_program' %}
+        {% include "all_aids.html" with all_aids=aids_list%}
+
     {% endif %}
 
     {% include 'others/profilemodal.html' %}
