@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Applications</title>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'users/css/modals.css' %}">
+
+<style>
+/* Table Styling */
+table {
+    width: 100%;
+    max-width: none;
+    margin: 20px 0;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 4px 8px; 
+    font-size: 15px; 
+    line-height: 1; 
+    text-align: left;
+}
+
+th {
+    background-color: #F4F3FA;; 
+    color: #white;
+    font-weight: bold;
+    padding: 15px;
+}
+
+tr {
+    height: 30px; /* Set a fixed row height */
+  }
+
+tr:nth-child(even) {
+    background-color: #F9F8FD; /* Slightly lighter purple */
+}
+
+tr:nth-child(odd) {
+    background-color: #FFFFFF;
+}
+
+/* Green Review Button */
+button {
+    background-color: #28A745;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+/* Custom Modal */
+.custom-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 999;
+    display: none;
+}
+
+.custom-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    max-width: 550px;
+    width: 100%;
+    display: none;
+}
+
+/* Modal Header */
+.custom-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.custom-modal-header h5 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.custom-close-btn {
+    background-color: rgba(255, 255, 255, 0.8); /* Light background */
+    border-radius: 5px;
+    font-size: 22px;
+    font-weight: bold;
+    color: black; /* Ensures visibility */
+    padding: 5px 10px;
+}
+
+.custom-close-btn:hover {
+    background: none !important;  /* Remove background change */
+    color: black !important;      /* Keep the text black */
+    cursor: pointer;
+}
+
+
+/* Form Styling */
+.form-label {
+    font-weight: bold;
+    margin-top: 10px;
+    display: block;
+}
+
+.form-control, .form-select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Buttons in Modal */
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+</style>
+
+</head>
+<body>
+    <h2 class="text-center">Manage Aid Applications</h2>
+    
+    <div class="container mt-4">
+        <table class="table table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Aid Program</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in applications %}
+                <tr>
+                    <td>{{ application.student.username }}</td>
+                    <td>{{ application.student.email }}</td>
+                    <td>{{ application.aid_program.name }}</td>
+                    <td>
+                        <span class="badge 
+                            {% if application.status == 'additional_info' %} bg-success}
+                            {% elif application.status == 'submitted_to_funder' %} bg-warning}
+                            {% else %} bg-secondary {% endif %}">
+                            {{ application.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="openModal(
+                            '{{ application.id }}',
+                            '{{ application.student.username }}',
+                            '{{ application.student.email }}',
+                            '{{ application.student.study_program }}',
+                            '{{ application.student.years_of_study }}',
+                            '{{ application.student.gpa }}',
+                            '{{ application.aid_program.name }}',
+                            '{{ application.get_status_display }}',
+                            '{{ application.status }}',
+                            '{{ application.officer_comment|default_if_none:'' }}'
+                        )">
+                            Review
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Single Custom Modal -->
+    <div class="custom-modal-backdrop" id="modalBackdrop"></div>
+    <div class="custom-modal" id="customModal">
+        <div class="custom-modal-header">
+            <h5>Review Application</h5>
+            <button type="button" class="custom-close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="custom-modal-body">
+            <form method="POST" id="reviewForm">
+                {% csrf_token %}
+
+                <h4 class="text-primary">Student Information</h4>
+                <p><strong>Name:</strong> <span id="modal-name"></span></p>
+                
+                <p><strong>Email:</strong> <span id="modal-email"></span></p>
+                <p><strong>Program:</strong> <span id="modal-program"></span></p>
+                <p><strong>Year:</strong> <span id="modal-year"></span></p>
+                <p><strong>GPA:</strong> <span id="modal-gpa"></span></p>
+
+                <h4 class="text-primary">Application Details</h4>
+                <p><strong>Aid Program:</strong> <span id="modal-aid-program"></span></p>
+                <p><strong>Current Status:</strong> <span id="modal-status"></span></p>
+
+                <label for="status" class="form-label">Update Status:</label>
+                <select name="status" id="modal-update-status" class="form-select">
+                    <option value="additional_info">Request More Info</option>
+                    <option value="submitted_to_funder">Submit to Funder</option>
+                </select>
+
+                <label for="officer_comment" class="form-label mt-3">Comments:</label>
+                <textarea name="officer_comment" id="modal-comment" class="form-control" rows="4"></textarea>
+
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn-success">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id, name, email, program, year, gpa, aidProgram, statusDisplay, status, comment) {
+            document.getElementById("reviewForm").action = `/review-application/${id}/`;
+            
+            document.getElementById("modal-name").textContent = name;
+            document.getElementById("modal-email").textContent = email;
+            document.getElementById("modal-program").textContent = program;
+            document.getElementById("modal-year").textContent = year;
+            document.getElementById("modal-gpa").textContent = gpa;
+            document.getElementById("modal-aid-program").textContent = aidProgram;
+            document.getElementById("modal-status").textContent = statusDisplay;
+
+            document.getElementById("modal-update-status").value = status;
+            document.getElementById("modal-comment").value = comment;
+
+            document.getElementById("customModal").style.display = "block";
+            document.getElementById("modalBackdrop").style.display = "block";
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const modalBackdrop = document.querySelector(".custom-modal-backdrop");
+            const modal = document.querySelector(".custom-modal");
+            const closeModalButtons = document.querySelectorAll(".custom-close-btn, .btn-secondary");
+        
+            function closeModal() {
+                modal.style.display = "none";
+                modalBackdrop.style.display = "none";
+            }
+        
+            closeModalButtons.forEach(button => {
+                button.addEventListener("click", closeModal);
+            });
+        
+            modalBackdrop.addEventListener("click", closeModal);
+        });
+        
+
+        function closeModal() {
+            document.getElementById("customModal").style.display = "none";
+            document.getElementById("modalBackdrop").style.display = "none";
+        }
+
+        document.getElementById("modalBackdrop").addEventListener("click", closeModal);
+    </script>
+</body>
+</html>
