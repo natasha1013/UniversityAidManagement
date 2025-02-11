@@ -133,11 +133,10 @@ table {
 
 /* Table header row */
 th {
-    background-color: #6a5acd; /* Purple */
-    color: white; /* White text */
+    background-color:  #F4F3FA; 
     font-weight: bold;
     padding: 15px;
-    text-align: left; /* Align left for username */
+    text-align: left; 
 }
 
 /* Align Action column to the right */
