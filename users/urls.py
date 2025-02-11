@@ -23,5 +23,11 @@ urlpatterns = [
     path('profile/officer-dashboard/', views.officer_dashboard, name='officer_dashboard'),
     path('profile/funder-dashboard/', views.officer_dashboard, name='funder_dashboard'),
     path('profile/?tab=aid_application/<int:application_id>/', review_application, name='review_application'),
+    path('profile/funder-dashboard/reject/<int:application_id>/', views.funder_reject_application, name='funder_reject_application'),
+    
+    
+    path('edit-aid/<int:aid_id>/', views.edit_aid, name='edit_aid'),
+
+    
 
 ]

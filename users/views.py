@@ -11,14 +11,14 @@ from django.contrib import messages
 
 from chats.models import Chat
 from .forms import *
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, IntegerField
 from .models import Account
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from feedbacks.models import Feedback
 from notifications.models import Notification, SystemLog
-from programs.models import AidProgram, ApplicationStatus, AppealStatus
-from programs.forms import AidProgramForm
+from programs.models import AidProgram, ApplicationStatus, AppealStatus, FundUtilization
+from programs.forms import AidProgramForm, FundUtilizationForm
 
 
 
@@ -518,9 +518,36 @@ def funder_dashboard(request):
         
         # Add form to the context
         context['form'] = form 
-    
+        
+    elif active_tab == 'aid_application':
+        """List all applications that need funder approval."""
+        fun_applications = ApplicationStatus.objects.filter(status="submitted_to_funder")
+        
+        context['applications'] = fun_applications 
+
+    elif active_tab == 'fund_utilization':
+        """List all applications that need funder approval."""
+        fun_utilizations = FundUtilization.objects.all()
+        context['utilizations'] = fun_utilizations 
 
     return render(request, 'dashboards/funder_dashboard.html', context)
+
+def funder_approve_application(request, application_id):
+    """Funders approve an application."""
+    application = get_object_or_404(ApplicationStatus, id=application_id)
+    application.status = "approved"
+    application.save()
+    messages.success(request, "Application approved successfully.")
+    return redirect('/funder_dashboard/?tab=aid_application')  # Redirects back to the tab
+
+def funder_reject_application(request, application_id):
+    """Funders reject an application."""
+    application = get_object_or_404(ApplicationStatus, id=application_id)
+    application.status = "rejected"
+    application.save()
+    messages.error(request, "Application rejected.")
+    return redirect(f"{reverse('funder_dashboard')}?tab=aid_application")
+
 
 # admin-only views
 @role_required('administrator')
@@ -595,9 +622,23 @@ def admin_dashboard(request):
         """Admin can review and approve/reject proposed aid programs."""
         pending_aids = AidProgram.objects.filter(approval_status="PENDING")
         context['pending_aids'] = pending_aids
-        
+    elif active_tab == 'edit_program':
+        """Admin can review and approve/reject proposed aid programs."""
+        all_aids = AidProgram.objects.all()
+        context['all_aids'] = all_aids
 
     return render(request, 'dashboards/admin_dashboard.html', context)
+
+def edit_aid(request, aid_id):
+    aid = get_object_or_404(AidProgram, id=aid_id)
+    if request.method == "POST":
+        form = AidProgramForm(request.POST, instance=aid)
+        if form.is_valid():
+            form.save()
+            return redirect('/profile/?tab=edit_program')
+    else:
+        form = AidProgramForm(instance=aid)
+    return render(request, 'edit_aid.html', {'form': form})
 
 def approve_aid(request, aid_id):
     """Admin approves an aid program."""
@@ -651,7 +692,16 @@ def officer_dashboard(request):
     
     # Manage aid applications
     if active_tab == 'aid_application':
-        applications = ApplicationStatus.objects.all().order_by('status')
+        applications = ApplicationStatus.objects.filter(
+            status__in=["pending", "additional_info", "submitted_to_funder"]
+        ).annotate(
+            status_order=Case(
+                When(status="pending", then=Value(1)),
+                When(status="additional_info", then=Value(2)),
+                When(status="submitted_to_funder", then=Value(3)),
+                output_field=IntegerField(),
+            )
+        ).order_by("status_order")
         context['applications'] = applications
 
         # If reviewing an application
@@ -672,6 +722,12 @@ def officer_dashboard(request):
 
             context['application'] = application  # Pass the specific application to the template
 
+    
+    elif active_tab == 'fund_utilization':  
+        """ Aid officers can monitor and flag suspicious transactions """
+        off_utilizations = FundUtilization.objects.all()
+        context['utilizations'] = off_utilizations
+         
 
     return render(request, 'dashboards/officer_dashboard.html', context)
 
@@ -720,6 +776,36 @@ def student_dashboard(request):
         # Fetch aid programs application_status
         application_status = ApplicationStatus.objects.filter(student=request.user)
         context['applications'] = application_status  # Pass the application_status to the template
+
+    elif active_tab == 'fund_utilization':
+        # Fetch aid programs application_status
+        student = request.user
+
+        # Get the student's approved applications
+        approved_apps = ApplicationStatus.objects.filter(student=student, status="approved")
+
+        # Get existing fund utilization records
+        fund_utilizations = FundUtilization.objects.filter(student=student)
+
+        if request.method == "POST":
+            form = FundUtilizationForm(request.POST)
+            if form.is_valid():
+                
+                fund_utilization = form.save(commit=False)
+                fund_utilization.student = student
+                fund_utilization.aid_program_id = request.POST.get("aid_program")  # Set manually
+
+                # Ensure they are updating an approved aid program
+                if not ApplicationStatus.objects.filter(student=student, aid_program=fund_utilization.aid_program, status="approved").exists():
+                    return redirect(f"{reverse('dashboard')}?tab=fund_utilization")                
+                fund_utilization.save()
+                return redirect(f"{reverse('dashboard')}?tab=fund_utilization")
+        else:
+            form = FundUtilizationForm()
+
+        context['form'] = form
+        context['fund_utilizations'] = fund_utilizations
+        context['approved_apps'] = approved_apps
 
 
     return render(request, 'dashboards/dashboard.html', context)

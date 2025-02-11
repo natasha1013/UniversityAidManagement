@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Fund Utilization Overview</h2>
+
+<!-- Table Styling -->
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    .flagged {
+        color: red;
+        font-weight: bold;
+    }
+    .not-flagged {
+        color: green;
+        font-weight: bold;
+    }
+    .acknowledged {
+        color: blue;
+        font-weight: bold;
+    }
+    .not-acknowledged {
+        color: orange;
+        font-weight: bold;
+    }
+</style>
+
+<table>
+    <tr>
+        <th>Student</th>
+        <th>Aid Program</th>
+        <th>Category</th>
+        <th>Amount Used</th>
+        <th>Status</th> <!-- New Column -->
+        <th>Acknowledged</th> <!-- New Column -->
+        <th>Acknowledge</th>
+    </tr>
+    {% for record in utilizations %}
+    <tr>
+        <td>{{ record.student.username }}</td>
+        <td>{{ record.aid_program.name }}</td>
+        <td>{{ record.category }}</td>
+        <td>RM{{ record.amount }}</td>
+        <td>
+            {% if record.flagged %}
+                <span class="flagged">Flagged</span>
+            {% else %}
+                <span class="not-flagged">Not Flagged</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if record.acknowledged_by_funder %}
+                <span class="acknowledged">Acknowledged</span>
+            {% else %}
+                <span class="not-acknowledged">Not Acknowledged</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if not record.acknowledged_by_funder %}
+            <form method="POST" action="{% url 'acknowledge_fund_utilization' record.id %}">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('Are you sure you want to acknowledge this record?');">
+                    Acknowledge
+                </button>
+            </form>
+            {% else %}
+            <span class="acknowledged">Already Acknowledged</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
+

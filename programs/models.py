@@ -2,10 +2,6 @@ from django.conf import settings
 from django.db import models
 from django.utils.timezone import now
 
-# The AidProgram model stores details about different aid programs available for students.
-from django.conf import settings
-from django.db import models
-from django.utils.timezone import now
 
 class AidProgram(models.Model):
     STATUS_CHOICES = [
@@ -27,6 +23,7 @@ class AidProgram(models.Model):
         ('PENDING', 'Pending'),
         ('APPROVED', 'Approved'),
         ('REJECTED', 'Rejected'),
+        ('SUBMIT TO FUNDERS', 'Submit to Funders'),
     ]
 
     name = models.CharField(max_length=255)
@@ -41,14 +38,12 @@ class AidProgram(models.Model):
     total_funds = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     proposed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
-    approval_status = models.CharField(max_length=10, choices=APPROVAL_CHOICES, default='PENDING')
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_CHOICES, default='PENDING')
 
     def __str__(self):
         return self.name
 
-# The ApplicationStatus model keeps track of students' applications for aid programs.
 class ApplicationStatus(models.Model):
-    # Different statuses an application can have.
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('under_review', 'Under Review'),
@@ -58,48 +53,22 @@ class ApplicationStatus(models.Model):
         ('submitted_to_funder', 'Submitted to Funder'),
     ]
 
-    aid_program = models.ForeignKey(AidProgram, on_delete=models.CASCADE)  
-    # Links each application to a specific aid program.
-    
-    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)    # Links the application to a student (user model).
-    # If the student is deleted, the application is also deleted.
+    aid_program = models.ForeignKey(AidProgram, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+    aid_officer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="reviews")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    last_update = models.DateField(default=now)
+    supporting_document = models.FileField(upload_to="documents/", null=True, blank=True)
+    officer_comment = models.TextField(blank=True, null=True)
+    allocated_funds = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
-    aid_officer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="reviews")  
-    # Links the application to an aid officer who reviews it.
-    # If the officer is deleted, their record is set to NULL instead of deleting the application.
+    def can_track_fund_utilization(self):
+        return self.status == "approved"
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')  
-    # Tracks the current status of the application.
-    
-    last_update = models.DateField(default=now)  
-    # Stores the last updated date of the application (defaults to the current date).
-
-    supporting_document = models.FileField(upload_to="documents/", null=True, blank=True)  
-    # Optional field for students to upload supporting documents.
-
-    officer_comment = models.TextField(blank=True, null=True)  
-    # Field for the reviewing officer to leave comments on the application.
-
-    allocated_funds = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  
-    # Optional field to store the amount of funds allocated to the applicant.
-    
-
-
-    def __str__(self):
-        return f"{self.student.username} - {self.aid_program.name} - {self.status}"  
-    # Returns the aid program name and current status when printed.
-
-# The AppealStatus model tracks appeals submitted by students if their application was rejected.
 class AppealStatus(models.Model):
     application = models.ForeignKey(ApplicationStatus, on_delete=models.CASCADE)  
-    # Links each appeal to a specific application.
-
-    appeal_reason = models.TextField()  
-    # Stores the reason why the student is appealing.
-
+    appeal_reason = models.TextField()
     appeal_date = models.DateField(default=now)  
-    # Records the date when the appeal was submitted (defaults to the current date).
-
     appeal_status = models.CharField(
         max_length=10,
         choices=[
@@ -109,8 +78,31 @@ class AppealStatus(models.Model):
         ],
         default='PENDING'
     )  
-    # Tracks the status of the appeal (default is Pending).
 
     def __str__(self):
         return f"Appeal for {self.application.aid_program.name} - {self.appeal_status}"  
-    # Returns a string indicating the aid program and appeal status when printed.
+
+class FundUtilization(models.Model):
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    aid_program = models.ForeignKey(AidProgram, on_delete=models.CASCADE)
+    category = models.CharField(
+        max_length=50, 
+        choices=[
+            ('TUITION', 'Tuition'),
+            ('LIVING', 'Living Expenses'),
+            ('BOOKS', 'Books'),
+            ('RESEARCH', 'Research'),
+            ('OTHER', 'Other')
+        ]
+    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(blank=True, null=True)
+    transaction_date = models.DateField(default=now)
+    flagged = models.BooleanField(default=False)
+    acknowledged_by_funder = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.student.username} - {self.aid_program.name} - {self.category} - {self.amount}"
+
+
+

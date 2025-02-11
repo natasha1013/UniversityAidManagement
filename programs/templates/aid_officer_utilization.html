@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Student Fund Utilization</h2>
+
+<!-- Table Styling -->
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+    .flagged {
+        color: red;
+        font-weight: bold;
+    }
+    .not-flagged {
+        color: green;
+        font-weight: bold;
+    }
+</style>
+
+{% if utilizations %}
+<table>
+    <tr>
+        <th>Student</th>
+        <th>Aid Program</th>
+        <th>Category</th>
+        <th>Amount Used</th>
+        <th>Status</th>  <!-- New Column -->
+        <th>Flag</th>
+    </tr>
+    {% for record in utilizations %}
+    <tr>
+        <td>{{ record.student.username }}</td>
+        <td>{{ record.aid_program.name }}</td>
+        <td>{{ record.category }}</td>
+        <td>RM{{ record.amount }}</td>
+        <td> 
+            {% if record.flagged %}
+                <span class="flagged">Flagged</span>
+            {% else %}
+                <span class="not-flagged">Not Flagged</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if not record.flagged %}
+            <form method="POST" action="{% url 'flag_fund_utilization' record.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="record_id" value="{{ record.id }}">
+                <button type="submit" onclick="return confirm('Are you sure you want to flag this record?');" title="Mark this fund utilization as flagged">
+                    Flag
+                </button>
+            </form>
+            {% else %}
+            <span class="flagged">Already Flagged</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No fund utilization records found.</p>
+{% endif %}
+
+{% endblock %}

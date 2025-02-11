@@ -91,7 +91,13 @@
                 <button type="submit" class="delete-button" >Continue</button>
             </form>
         </div> <!-- Close Delete Account Section -->
-
+    
+    {% elif active_tab == 'aid_application'%}
+        {% include 'manage_aid_applications.html' %}
+       
+    {% elif active_tab == 'fund_utilization'%}
+        {% include 'aid_officer_utilization.html' %}
+        
     {% endif %}
 
 {% endblock dashboard %}

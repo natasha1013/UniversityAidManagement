@@ -63,6 +63,13 @@
             {% elif active_tab == 'chat' %}
                 {% include "chats/chat.html" %}
 
+            {% elif active_tab == 'application_status' %}
+                {% include 'application_status.html' %}
+
+            {% elif active_tab == 'fund_utilization' %}
+                {% include 'student_fund_utilization.html' %}
+
+
             {% endif %}
 
             {% block dashboard %} 

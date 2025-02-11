@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -152,9 +154,8 @@
                     <td>{{ application.aid_program.name }}</td>
                     <td>
                         <span class="badge 
-                            {% if application.status == 'approved' %} bg-success 
-                            {% elif application.status == 'rejected' %} bg-danger 
-                            {% elif application.status == 'additional_info' %} bg-warning 
+                            {% if application.status == 'additional_info' %} bg-success}
+                            {% elif application.status == 'submitted_to_funder' %} bg-warning}
                             {% else %} bg-secondary {% endif %}">
                             {{ application.get_status_display }}
                         </span>
@@ -206,9 +207,8 @@
 
                 <label for="status" class="form-label">Update Status:</label>
                 <select name="status" id="modal-update-status" class="form-select">
-                    <option value="approved">Approve</option>
-                    <option value="rejected">Reject</option>
                     <option value="additional_info">Request More Info</option>
+                    <option value="submitted_to_funder">Submit to Funder</option>
                 </select>
 
                 <label for="officer_comment" class="form-label mt-3">Comments:</label>
