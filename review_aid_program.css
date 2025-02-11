@@ -1,0 +1,75 @@
+/* General table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Table headers */
+thead th {
+    background-color: #f5f4fa; /* Light purple header background */
+    padding: 15px;
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid #ddd;
+}
+
+/* Table rows */
+tbody tr:nth-child(even) {
+    background-color: #fafafa; /* Alternating row color */
+}
+
+tbody tr:hover {
+    background-color: #f0eefb; /* Light hover effect */
+}
+
+/* Table cells */
+td, th {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    white-space: nowrap; /* Prevents text from breaking into multiple lines */
+}
+
+/* Add spacing between columns */
+td:not(:last-child), th:not(:last-child) {
+    padding-right: 50px; /* Adjust spacing between columns */
+}
+
+/* Button container */
+td:last-child {
+    padding: 15px; /* Adds padding around buttons for spacing */
+}
+
+/* Custom button styling */
+.btn {
+    padding: 10px 15px; /* Increased padding for better spacing */
+    font-size: 0.9rem;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    margin: 5px; /* Adds space between buttons */
+    display: inline-block;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}

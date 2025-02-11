@@ -1,0 +1,82 @@
+/* General table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Table headers */
+thead th {
+    background-color: #f5f4fa; /* Light purple header background */
+    padding: 10px; /* Reduced padding for tighter spacing */
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid #ddd;
+}
+
+/* Table rows */
+tbody tr:nth-child(even) {
+    background-color: #fafafa; /* Alternating row color */
+}
+
+tbody tr:hover {
+    background-color: #f0eefb; /* Light hover effect */
+}
+
+/* Table cells */
+td, th {
+    padding: 10px; /* Reduced padding for tighter row spacing */
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    white-space: nowrap; /* Prevents text from breaking into multiple lines */
+}
+
+/* Add spacing between columns */
+td:not(:last-child), th:not(:last-child) {
+    padding-right: 20px; /* Reduced spacing between columns */
+}
+
+/* Button container */
+td:last-child {
+    padding: 10px; /* Adjusted padding around buttons */
+}
+
+/* Custom button styling */
+.btn {
+    padding: 8px 12px; /* Slightly smaller button padding */
+    font-size: 0.9rem;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    margin: 5px; /* Adds space between buttons */
+    display: inline-block;
+}
+
+.btn-warning {
+    background-color: #007BFF;
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: #0056b3;
+}
+
+/* Custom Status Colors */
+.status-approved {
+    color: #28a745 !important; /* Green for approved */
+    font-weight: bold;
+}
+
+.status-rejected {
+    color: #dc3545 !important; /* Red for rejected */
+    font-weight: bold;
+}
+
+.status-pending {
+    color: #ffc107 !important; /* Yellow for pending */
+    font-weight: bold;
+}
