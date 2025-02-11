@@ -133,20 +133,8 @@ button:hover {
                 <option value="{{ app.aid_program.id }}">{{ app.aid_program.name }}</option>
                 {% endfor %}
             </select>
-
-            <label for="id_category">Category:</label>
-            {{ form.category }}
-    
-            <label for="id_amount">Amount:</label>
-            {{ form.amount }}
-    
-            <label for="id_description">Description:</label>
-            {{ form.description }}
-    
-            <label for="id_transaction_date">Transaction Date:</label>
-            {{ form.transaction_date }}
             <br>
-          
+            {{ form.as_p }}
             <button type="submit">Submit</button>
         </form>
     </div>
