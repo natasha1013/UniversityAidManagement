@@ -2,56 +2,91 @@
 
 {% block content %}
 <style>
-    /* Center everything */
+table {
+    width: 100%;
+    max-width: none;
+    margin: 20px 0;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 
+th, td {
+    padding: 10px 12px; 
+    font-size: 15px; 
+    line-height: 1; 
+    text-align: left;
+}
 
-    /* Styling for the table */
-    .table-container {
-        width: 100%;
-        margin-bottom: 20px;
-    }
+th {
+    background-color: #F4F3FA; 
+    font-weight: bold;
+    padding: 15px;
+    text-align: left;
+}
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-    }
+td {
+    border-bottom: 1px solid #ddd;
+}
 
-    th, td {
-        border: 1px solid black;
-        padding: 12px;
-        text-align: left;
-        min-width: 150px; /* Ensures minimum width */
-        word-wrap: break-word;
-    }
+tr {
+    height: 30px; 
+  }
 
-    th {
-        background-color: #f2f2f2;
-        font-weight: bold;
-    }
+.form-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 
-    /* Styling for the form */
-    .form-container {
-        width: 50%;
-        padding: 15px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        background-color: #f9f9f9;
-    }
+.form-container h3 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
 
-    /* Button styling */
-    button {
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
+.form-container label {
+    display: block;
+    font-weight: bold;
+    margin-top: 10px;
+}
 
-    button:hover {
-        background-color: #45a049;
-    }
+.form-container input,
+.form-container select,
+.form-container textarea {
+    width: 100%; /* Make input fields fill the container */
+    padding: 10px; 
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    box-sizing: border-box; /* Ensures padding doesn't affect width */
+}
+
+.form-container textarea {
+    height: 100px;
+}
+
+button {
+    width: 100%;
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
 </style>
 
 
@@ -98,8 +133,20 @@
                 <option value="{{ app.aid_program.id }}">{{ app.aid_program.name }}</option>
                 {% endfor %}
             </select>
+
+            <label for="id_category">Category:</label>
+            {{ form.category }}
+    
+            <label for="id_amount">Amount:</label>
+            {{ form.amount }}
+    
+            <label for="id_description">Description:</label>
+            {{ form.description }}
+    
+            <label for="id_transaction_date">Transaction Date:</label>
+            {{ form.transaction_date }}
             <br>
-            {{ form.as_p }}
+          
             <button type="submit">Submit</button>
         </form>
     </div>
