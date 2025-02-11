@@ -1,0 +1,120 @@
+/* General Styles for Update User Section */
+.container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto; /* Ensures responsiveness */
+}
+
+table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Header Row Styling */
+th, td {
+    padding: 15px 20px;
+    text-align: left;
+    white-space: nowrap; /* Prevents text wrapping */
+}
+
+th {
+    background-color: #D1CDE5;
+    color: #333;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+/* Alternate Row Colors */
+tbody tr:nth-child(odd) {
+    background-color: #FFFFFF;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #F7F6FE;
+}
+
+/* Row Hover Effect */
+tbody tr:hover {
+    background-color: #e9f5ff;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 30px;
+    font-size: 16px;
+    border-radius: 15px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    text-decoration: none;
+}
+
+/* Primary Button (Approve) */
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    margin-right: 10px;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+/* Danger Button (Reject) */
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+/* Focus State for Accessibility */
+button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+}
+
+/* Full-Width Layout Fix */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.container, table {
+    width: 100%;
+    max-width: 100%;
+}
+
+th, td {
+    min-width: 255px; /* Ensures a consistent column width */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    .btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}

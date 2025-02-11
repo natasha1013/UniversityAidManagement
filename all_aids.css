@@ -1,0 +1,114 @@
+/* General table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Header Row Styling */
+th, td {
+    padding: 15px 20px;
+    text-align: left;
+}
+
+th {
+    background-color: #D1CDE5;
+    color: #333;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+/* Alternate Row Colors */
+tbody tr:nth-child(odd) {
+    background-color: #FFFFFF; /* White for odd rows */
+}
+
+tbody tr:nth-child(even) {
+    background-color: #F7F6FE; /* Light purple for even rows */
+}
+
+/* Row Hover Effect */
+tbody tr:hover {
+    background-color: #e9f5ff; /* Hover color for all rows */
+}
+
+/* Custom Status Colors */
+.status-approved {
+    color: #28a745; /* Green for approved */
+    font-weight: bold;
+}
+
+.status-rejected {
+    color: #dc3545; /* Red for rejected */
+    font-weight: bold;
+}
+
+.status-pending {
+    color: #ffc107; /* Yellow for pending */
+    font-weight: bold;
+}
+
+/* Button Styling */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 15px; /* Adjust roundness */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none; /* Ensure no underline */
+}
+
+/* Approve Button */
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+/* Reject Button */
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
+/* Edit Button (Blue Style) */
+.btn-warning {
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    font-weight: bold;
+    border: none;
+    border-radius: 15px; /* Rounded corners */
+    padding: 10px 20px; /* Adjust padding */
+    transition: all 0.3s ease; /* Smooth hover effect */
+    font-size: 14px; /* Font size for consistency */
+    text-decoration: none; /* Ensure no underline */
+}
+
+.btn-warning:hover {
+    background-color: #0056b3; /* Dark blue on hover */
+    color: white; /* Keep white text on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    th, td {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+}
